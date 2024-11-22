@@ -1,0 +1,126 @@
+/* Contenedor principal */
+.login-container-custom {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+/* Cabecera */
+.login-header-container-custom {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header-container-custom h1 {
+    font-size: 48px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.login-header-container-custom h2 {
+    font-size: 24px;
+    color: #d4af37;
+    font-style: italic;
+}
+
+/* Formulario */
+.login-form-container-custom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    width: 320px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo de los campos de entrada */
+.login-input-custom {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 16px;
+}
+
+/* Contenedor para iconos */
+.login-input-container-custom {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-icon-custom {
+    padding: 10px;
+}
+
+/* Botón de login */
+.login-button-container-custom {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.login-button-custom {
+    background-color: #d4af37;
+    padding: 14px;
+    width: 100%;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-button-custom:hover {
+    background-color: #b88d29;
+}
+
+/* Contenedor de bloqueo */
+.login-lock-container-custom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.login-lock-container-custom p {
+    font-size: 20px;
+    color: #333;
+    margin-top: 20px;
+}
+
+/* Alertas */
+.login-alert-custom {
+    margin-bottom: 10px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.login-alert-custom.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.login-alert-custom.success {
+    background-color: #d4edda;
+    color: #155724;
+}
