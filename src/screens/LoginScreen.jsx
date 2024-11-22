@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { decode as atob } from "base-64";
 import { FaEye, FaEyeSlash, FaLock, FaLockOpen } from "react-icons/fa";
+import { motion } from "framer-motion";
 //import "../styles/LoginScreen.css";
 
 const LoginScreen = () => {
@@ -18,7 +19,7 @@ const LoginScreen = () => {
 
     const buttonScale = useRef(1);
     //const fadeAnim = useRef(0);
-    const lockAnim = useRef(0);
+    const [lockAnim, setLockAnim] = useState(0);
 
     const navigate = useNavigate();
 
@@ -44,18 +45,12 @@ const LoginScreen = () => {
                 "http://localhost:3000/api/auth/login",
                 { email, password }
             );
-            console.log("Respuesta completa de la API:", response);
-            // Verificar si la respuesta contiene un token
+
             if (response.data && response.data.token) {
                 const { token } = response.data;
                 localStorage.setItem("token", token);
-                console.log(
-                    "Token en localStorage:",
-                    localStorage.getItem("token")
-                );
 
                 const decoded = decodeJWT(token);
-                console.log("Decoded JWT:", decoded);
                 if (!decoded || !decoded.role) {
                     setAlertMessage("Error al obtener el rol del usuario.");
                     setAlertType("error");
@@ -65,15 +60,15 @@ const LoginScreen = () => {
 
                 setUserName(decoded.nombre || "Usuario");
                 setLoginSuccess(true);
-                lockAnim.current = 1;
+                setLockAnim(1); // Actualiza el estado para animar el candado
                 setIsUnlocked(true);
+
                 setTimeout(() => {
                     if (decoded.role === "Administrador") {
                         navigate("/admin-dashboard");
                     } else if (decoded.role === "Trabajador") {
                         navigate("/worker-dashboard");
                     }
-                    console.log("Rol decodificado:", decoded.role);
                 }, 1500);
             } else {
                 setAlertMessage("No se recibió token en la respuesta.");
@@ -103,12 +98,19 @@ const LoginScreen = () => {
             </div>
 
             {loginSuccess ? (
-                <div style={styles.lockContainer}>
-                    <div
+                <div>
+                    <motion.div
+                        initial={{ rotateZ: 0, y: 0 }} // Posición inicial (cerrado y sin movimiento)
+                        animate={
+                            isUnlocked
+                                ? { rotateZ: -45, y: 0 }
+                                : { rotateZ: 0, y: 0 }
+                        } // Animación al desbloquear
+                        transition={{ duration: 0.5, ease: "easeInOut" }} // Duración y suavidad de la animación
                         style={{
-                            transform: `translateY(${
-                                lockAnim.current * -20
-                            }px)`,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
                         }}
                     >
                         {isUnlocked ? (
@@ -116,7 +118,7 @@ const LoginScreen = () => {
                         ) : (
                             <FaLock size={30} color="#d4af37" />
                         )}
-                    </div>
+                    </motion.div>
                     <p style={styles.welcomeText}>Hola, {userName}</p>
                 </div>
             ) : (
@@ -282,8 +284,8 @@ const styles = {
         fontWeight: "bold",
     },
     welcomeText: {
-        color: "#ffff"
-    }
+        color: "#ffff",
+    },
 };
 
 export default LoginScreen;

@@ -75,7 +75,7 @@ const ClienteDetails = () => {
                 ]
             );
         }
-    }, [cliente]);
+    }, [cliente, navigate]);
 
     const handleAddAbono = () => {
         window.alert(
@@ -88,35 +88,50 @@ const ClienteDetails = () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-
-            const today = new Date().toISOString().split("T")[0]; // Fecha en formato YYYY-MM-DD
+    
+            const today = new Date(); // Obtenemos el objeto Date directamente
+            const todayISOString = today.toISOString().split("T")[0]; // Convertimos a ISO
             const fechaProximoPago = parseISO(cliente?.fecha_proximo_pago); // Asegúrate de que la fecha esté en formato ISO
-
+    
             if (isBefore(today, fechaProximoPago)) {
                 window.alert(
                     `No se puede realizar esta acción hasta la fecha de pago: ${fechaProximoPago.toLocaleDateString()}.`
                 );
                 return;
             }
-
-            const lastNoAbonoDate = localStorage.getItem(
-                `lastNoAbonoDate_${id}`
-            );
-            if (lastNoAbonoDate === today.toISOString().split("T")[0]) {
+    
+            const lastNoAbonoDate = localStorage.getItem(`lastNoAbonoDate_${id}`);
+            if (lastNoAbonoDate === todayISOString) {
                 window.alert(
                     'El botón de "No abonó" solo se puede presionar una vez al día.'
                 );
                 return;
             }
-
-            localStorage.setItem(
-                `lastNoAbonoDate_${id}`,
-                today.toISOString().split("T")[0]
-            );
+    
+            localStorage.setItem(`lastNoAbonoDate_${id}`, todayISOString);
+    
+            // Actualiza el estado de los abonos con el nuevo "no abonado"
+            setAbonos((prevAbonos) => [
+                ...prevAbonos,
+                {
+                    monto: 0,
+                    fecha: today.toISOString(),
+                    estado: "no_abono",
+                },
+            ]);
+    
+            // Puedes también actualizar el estado de cliente si es necesario
+            setCliente((prevCliente) => ({
+                ...prevCliente,
+                monto_actual: prevCliente.monto_actual, // Mantener el monto actual
+            }));
+    
+            window.alert("El cliente no abonó hoy.");
         } catch (error) {
             console.error("Error en la lógica de 'No abonó':", error);
         }
     };
+    
 
     const handleToggleAbonos = () => {
         setIsAbonosVisible(!isAbonosVisible);

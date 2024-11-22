@@ -68,6 +68,7 @@ const handleAddCliente = async () => {
     try {
       // Usar localStorage para obtener el token
       const token = localStorage.getItem('token');
+      console.log("Token de autenticación:", token);
       if (!token) throw new Error('No se encontró un token de autenticación');
 
       await axios.post(
@@ -98,12 +99,25 @@ const handleAddCliente = async () => {
       setAbonoInicial('');
       setProductos([]);
 
-      navigate(-1);  // Volver a la pantalla anterior
+      navigate('worker-dashboard');  // Volver a la pantalla anterior
     } catch (error) {
+      console.error('Error al agregar cliente:', error);
       alert('Error', 'Hubo un problema al agregar el cliente');
-    } finally {
+    }
+     finally {
       setIsLoading(false);
     }
+    console.log({
+      nombre,
+      direccion,
+      telefono,
+      producto_id: producto?.value,
+      quilates: parseFloat(quilates),
+      precio_total: parseFloat(precioTotal),
+      forma_pago: formaPago?.value,
+      monto_actual: montoActual,
+    });
+    
   };
 
 
