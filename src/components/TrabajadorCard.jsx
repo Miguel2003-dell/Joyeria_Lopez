@@ -1,219 +1,152 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Para navegación en la web
-import { Modal, Button } from 'react-bootstrap'; // Usando Bootstrap para modales
-import { FaPencilAlt, FaTrash, FaDownload } from 'react-icons/fa'; // Usando react-icons para los íconos
-import EditarTrabajador from './EditarTrabajador';
-import * as XLSX from 'xlsx';
+import { Modal, Button, IconButton, Typography, List, ListItem, ListItemText } from '@mui/material'; 
+import { Edit, Delete, Download, Work, Group } from '@mui/icons-material';
+import axios from 'axios';
 
-const TrabajadorCard = ({ trabajador, onDelete }) => {
+const TrabajadorCard = ({ trabajador, onDelete, onEdit }) => {
     const [showClientes, setShowClientes] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const navigate = useNavigate(); // Reemplazamos navigation por useNavigate
+    const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [clientes, setClientes] = useState([]); // Estado para almacenar los clientes
 
-    const handleSave = async (updatedWorker) => {
-        const token = localStorage.getItem('token'); // Usamos localStorage en lugar de AsyncStorage
-
-        try {
-            const response = await fetch(`http://192.168.1.17:3000/trabajadores/${trabajador.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(updatedWorker),
-            });
-
-            if (response.ok) {
-                setIsEditing(false);
-            } else {
-                console.error('Error actualizando trabajador:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error actualizando trabajador:', error);
-        }
+    // Función de edición
+    const handleEdit = () => {
+        // Navega a la página de edición del trabajador
+        onEdit(trabajador); // Suponiendo que onEdit maneja la lógica para navegar o abrir el modal
     };
 
-    const eliminarTrabajador = async () => {
-        const token = localStorage.getItem('token'); // Usamos localStorage
-
-        try {
-            const response = await fetch(`http://192.168.1.17:3000/trabajadores/${trabajador.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-            });
-
-            if (response.ok) {
-                alert('Trabajador eliminado correctamente');
-                setIsDeleting(false);
-                if (onDelete) onDelete(trabajador.id);
-            } else {
-                console.error('Error eliminando trabajador:', response.statusText);
-                alert('Error', 'No se pudo eliminar el trabajador');
-            }
-        } catch (error) {
-            console.error('Error eliminando trabajador:', error);
-            alert('Error', 'No se pudo eliminar el trabajador');
-        }
+    // Función para abrir el modal de eliminación
+    const handleDeleteModalOpen = () => {
+        setDeleteModalVisible(true);
     };
 
-    const handleDownload = async () => {
-        const token = localStorage.getItem('token'); // Usamos localStorage
+    // Función para cerrar el modal de eliminación
+    const handleDeleteModalClose = () => {
+        setDeleteModalVisible(false);
+    };
 
-        try {
-            const response = await fetch(`http://192.168.1.67:3000/estadisticas/trabajador/${trabajador.id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
+    // Confirmar eliminación del trabajador
+    const confirmDelete = () => {
+        axios.delete(`http://localhost:3000/api/trabajadores/eliminar/${trabajador.id_usuario}`)
+            .then(() => {
+                handleDeleteModalClose();
+                onDelete(trabajador.id_usuario); // Llama a la función de eliminación
+            })
+            .catch(error => {
+                const errorMessage = error.response?.data?.message || 'Error desconocido al eliminar el trabajador';
+                console.error(errorMessage);
             });
+    };
 
-            if (!response.ok) {
-                throw new Error('Error al obtener estadísticas del trabajador');
+    // Función para exportar los datos de clientes
+    const handleExport = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
+            const clientes = response.data.clientes || [];
+
+            if (!Array.isArray(clientes)) {
+                throw new Error('La respuesta de la API no es válida');
             }
 
-            const data = await response.json();
-            const formattedData = data.map((cliente, index) => ({
-                'No.': index + 1,
-                'Nombre cliente': cliente.nombre,
-                'Direccion': cliente.direccion,
-                'Telefono': cliente.telefono,
-                'Monto inicial': cliente.monto_inicial,
-                'Esquema de Dias-%': `${cliente.dias_prestamo === 15 ? `15 días $85x1000 30%` : cliente.dias_prestamo === 20 ? `20 días $65x1000 30%` : cliente.esquema_dias}`,
-                'Fecha de inicio del prestamo': new Date(cliente.fecha_inicio).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
-                'Fecha de termino': new Date(cliente.fecha_termino).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                }),
-                'Observaciones': cliente.ocupacion
-            }));
+            const conMonto = clientes.filter(cliente => parseFloat(cliente.monto_actual) > 0);
+            const sinMonto = clientes.filter(cliente => parseFloat(cliente.monto_actual) === 0);
 
-            const ws = XLSX.utils.json_to_sheet(formattedData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Clientes");
-            const wbout = XLSX.write(wb, { type: 'binary', bookType: "xlsx" });
-
-            const s2ab = (s) => {
-                const buf = new ArrayBuffer(s.length);
-                const view = new Uint8Array(buf);
-                for (let i = 0; i !== s.length; ++i) {
-                    view[i] = s.charCodeAt(i) & 0xFF;
-                }
-                return buf;
+            const formatToCSV = (data, title) => {
+                const rows = data.map(cliente => `${cliente.id_cliente},${cliente.nombre},${cliente.telefono},${cliente.direccion},${cliente.email},${cliente.monto_actual}`).join('\n');
+                return `${title}\nNo.,Nombre completo,direccion,telefono,Correo,Por Pagar\n${rows}`;
             };
 
-            const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+            const csvContent = [
+                '\ufeff',
+                formatToCSV(conMonto, 'Clientes Activos'),
+                formatToCSV(sinMonto, 'Clientes Finalizados'),
+            ].join('\n\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Estadisticas_clientes_Trabajador_${trabajador.nombre}.xlsx`;
+            link.setAttribute('download', `clientes_trabajador_${trabajador.nombre}_${trabajador.apellidos}.csv`);
+            document.body.appendChild(link);
             link.click();
-            window.URL.revokeObjectURL(url);
+            link.remove();
         } catch (error) {
-            console.error('Error exportando clientes:', error);
+            console.error('Error al exportar clientes:', error.message || error);
         }
     };
 
+    // Función para mostrar/ocultar los clientes
+    const handleShowClientes = async () => {
+        if (!showClientes) {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
+                setClientes(response.data.clientes || []); // Guardamos los clientes obtenidos
+            } catch (error) {
+                console.error('Error al obtener clientes:', error.message || error);
+            }
+        }
+        setShowClientes(prev => !prev); // Alterna el estado después de hacer la llamada
+    };
+
     return (
-        <div style={styles.card}>
-            <p style={styles.cardText}>Nombre: {trabajador.nombre}</p>
-            <p style={styles.cardText}>Rol: {trabajador.role}</p>
-            <p style={styles.cardText}>Total de Clientes: {trabajador.clientes.length}</p>
-            <Button
-                variant="primary"
-                onClick={() => navigate('/trabajador-clientes', { state: { id: trabajador.id } })}
-            >
-                Ver clientes
+        <div className="card">
+            <div className="header">
+                <Typography variant="h6">{`${trabajador.nombre} ${trabajador.apellidos}`}</Typography>
+                <div className="icon-container">
+                    <IconButton onClick={handleEdit} color="primary">
+                        <Edit />
+                    </IconButton>
+                    <IconButton onClick={handleDeleteModalOpen} color="error">
+                        <Delete />
+                    </IconButton>
+                    <IconButton onClick={handleExport} color="success">
+                        <Download />
+                    </IconButton>
+                </div>
+            </div>
+            <div className="row">
+                <Work style={{ color: '#f5c469' }} />
+                <Typography>{trabajador.rol}</Typography>
+            </div>
+            <div className="row">
+                <Group style={{ color: '#f5c469' }} />
+                <Typography>{trabajador.cliente_count} Clientes</Typography>
+            </div>
+            <Button variant="contained" color="warning" onClick={handleShowClientes}>
+                {showClientes ? 'Ocultar clientes' : 'Ver clientes'}
             </Button>
+
             {showClientes && (
-                <div style={styles.clientesContainer}>
-                    {trabajador.clientes.map(cliente => (
-                        <div key={cliente.id} style={styles.clienteCard}>
-                            {/* Aquí podrías usar un componente ClienteCard si lo tienes */}
-                            <p>{cliente.nombre}</p>
-                        </div>
-                    ))}
+                <div>
+                    <Typography variant="h6">Clientes:</Typography>
+                    <List>
+                        {clientes.map(cliente => (
+                            <ListItem key={cliente.id_cliente}>
+                                <ListItemText
+                                    primary={cliente.nombre}
+                                    secondary={`Monto: ${cliente.monto_actual}`}
+                                />
+                            </ListItem>
+                        ))}
+                    </List>
                 </div>
             )}
-            <div style={styles.iconContainer}>
-                <button style={styles.editButton} onClick={() => setIsEditing(true)}>
-                    <FaPencilAlt size={20} color="#fff" />
-                </button>
-                <button style={styles.deleteButton} onClick={() => setIsDeleting(true)}>
-                    <FaTrash size={20} color="#fff" />
-                </button>
-                <button style={styles.downloadButton} onClick={handleDownload}>
-                    <FaDownload size={20} color="#fff" />
-                </button>
-            </div>
-            <Modal show={isEditing} onHide={() => setIsEditing(false)} centered>
-                <Modal.Body>
-                    <EditarTrabajador worker={trabajador} onSave={handleSave} onClose={() => setIsEditing(false)} />
-                </Modal.Body>
-            </Modal>
-            <Modal show={isDeleting} onHide={() => setIsDeleting(false)} centered>
-                <Modal.Body>
-                    <p style={styles.modalText}>¿Está seguro que desea eliminar este trabajador?</p>
-                    <div style={styles.modalButtonContainer}>
-                        <Button variant="secondary" onClick={() => setIsDeleting(false)}>Cancelar</Button>
-                        <Button variant="danger" onClick={eliminarTrabajador}>Eliminar</Button>
+
+            <Modal open={isDeleteModalVisible} onClose={handleDeleteModalClose}>
+                <div className="modal-content">
+                    <Typography variant="h6">Eliminar Trabajador</Typography>
+                    <Typography>¿Estás seguro de que deseas eliminar a este trabajador?</Typography>
+                    <div className="modal-buttons">
+                        <Button variant="outlined" onClick={handleDeleteModalClose}>
+                            Cancelar
+                        </Button>
+                        <Button variant="contained" color="error" onClick={confirmDelete}>
+                            Eliminar
+                        </Button>
                     </div>
-                </Modal.Body>
+                </div>
             </Modal>
         </div>
     );
-};
-
-const styles = {
-    card: {
-        padding: '20px',
-        margin: '10px',
-        border: '1px solid #ccc',
-        borderRadius: '10px',
-        backgroundColor: '#E8E8E8',
-        boxShadow: '0px 2px 5px rgba(0,0,0,0.1)',
-    },
-    cardText: {
-        fontSize: '16px',
-        marginBottom: '10px',
-    },
-    clientesContainer: {
-        marginTop: '10px',
-    },
-    iconContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: '10px',
-    },
-    editButton: {
-        backgroundColor: '#2e5c74',
-        padding: '10px',
-        borderRadius: '5px',
-        border: 'none',
-    },
-    deleteButton: {
-        backgroundColor: '#e74c3c',
-        padding: '10px',
-        borderRadius: '5px',
-        border: 'none',
-    },
-    downloadButton: {
-        backgroundColor: '#3498db',
-        padding: '10px',
-        borderRadius: '5px',
-        border: 'none',
-    },
-    modalText: {
-        fontSize: '16px',
-        marginBottom: '10px',
-    },
-    modalButtonContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-    },
 };
 
 export default TrabajadorCard;

@@ -1,213 +1,284 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';  // Usar React Router para la navegación
-
-// Importamos el paquete react-select para un select avanzado
-import Select from 'react-select';
-
-// Estilo en CSS en lugar de StyleSheet
-import '../styles/NuevoCliente.css';
+import FloatingLabelInput from '../components/FloatingLabelInput'; // Ensure this component is compatible with web
 
 const NuevoCliente = () => {
-  const navigate = useNavigate();
-  const [nombre, setNombre] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [producto, setProducto] = useState(null);
-  const [categoria, setCategoria] = useState(null);
-  const [categorias, setCategorias] = useState([]);
-  const [productos, setProductos] = useState([]);
-  const [quilates, setQuilates] = useState('');
-  const [precioTotal, setPrecioTotal] = useState('');
-  const [formaPago, setFormaPago] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [abonoInicial, setAbonoInicial] = useState('');
+    const [nombre, setNombre] = useState('');
+    const [direccion, setDireccion] = useState('');
+    const [telefono, setTelefono] = useState('');
+    const [producto, setProducto] = useState(null);
+    const [categoria, setCategoria] = useState(null);
+    const [categorias, setCategorias] = useState([]);
+    const [productos, setProductos] = useState([]);
+    const [precioTotal, setPrecioTotal] = useState('');
+    const [formaPago, setFormaPago] = useState('');
+    const [abonoInicial, setAbonoInicial] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [filteredCategorias, setFilteredCategorias] = useState([]);
+    const [searchProductText, setSearchProductText] = useState(''); 
+    const [filteredProductos, setFilteredProductos] = useState([]);
+    const [modalProductosVisible, setModalProductosVisible] = useState(false);
 
-  useEffect(() => {
-    const fetchCategorias = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/categorias');
-        const categorias = response.data.map((cat) => ({
-          label: cat.nombre,
-          value: cat.id_categoria,
-        }));
-        setCategorias(categorias);
-      } catch (error) {
-        alert('Error', 'No se pudieron cargar las categorías');
-      }
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/api/categorias');
+                setCategorias(response.data);
+                setFilteredCategorias(response.data);
+            } catch (error) {
+                console.error('Error al cargar categorías:', error);
+                alert('Error al cargar categorías');
+            }
+        };
+
+        fetchCategorias();
+    }, []);
+
+    const fetchProductosPorCategoria = async (categoriaId) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:3000/api/productos?categoria=${categoriaId}`
+            );
+            setProductos(response.data);
+        } catch {
+            alert('Error al cargar productos');
+        }
     };
 
-    fetchCategorias();
-  }, []);
+    const handleSelectCategoria = (id, nombre) => {
+        setCategoria(id);
+        setSearchText(nombre);
+        setModalVisible(false);
+        fetchProductosPorCategoria(id);
+    };
 
-  const fetchProductosPorCategoria = async (categoriaId) => {
-    try {
-      const response = await axios.get(`http://localhost:3000/api/productos?categoria=${categoriaId}`);
-      const productos = response.data.map((prod) => ({
-        label: prod.nombre,
-        value: prod.id_producto,
-      }));
-      setProductos(productos);
-    } catch {
-      alert('Error', 'No se pudieron cargar los productos');
-    }
-  };
+    const handleSelectProducto = (id, nombre) => {
+        setProducto(id);
+        setSearchProductText(nombre);
+        setModalProductosVisible(false);
+    };
 
-const handleAddCliente = async () => {
-    setIsLoading(true);
-    if (!nombre || !direccion || !telefono || !producto || !quilates || !precioTotal || !formaPago) {
-      alert('Error', 'Por favor, complete todos los campos');
-      setIsLoading(false);
-      return;
-    }
+    const handleSearch = (text) => {
+        setSearchText(text);
+        const filtered = categorias.filter((cat) =>
+            cat.nombre.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredCategorias(filtered);
+    };
 
-    const montoActual = abonoInicial
-      ? Math.max(0, parseFloat(precioTotal) - parseFloat(abonoInicial))
-      : parseFloat(precioTotal);
+    const handleSearchProduct = (text) => {
+        setSearchProductText(text);
+        const filtered = productos.filter((prod) =>
+            prod.nombre.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredProductos(filtered);
+    };
 
-    try {
-      // Usar localStorage para obtener el token
-      const token = localStorage.getItem('token');
-      console.log("Token de autenticación:", token);
-      if (!token) throw new Error('No se encontró un token de autenticación');
+    useEffect(() => {
+        setFilteredProductos(productos);
+    }, [productos]);
 
-      await axios.post(
-        'http://localhost:3000/api/clientes',
-        {
-          nombre,
-          direccion,
-          telefono,
-          producto_id: producto,
-          quilates: parseFloat(quilates),
-          precio_total: parseFloat(precioTotal),
-          forma_pago: formaPago,
-          monto_actual: montoActual,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const handleAddCliente = async () => {
+        setIsLoading(true);
 
-      alert('Éxito', 'Cliente agregado exitosamente');
+        if (!nombre || !direccion || !telefono || !producto || !precioTotal || !formaPago) {
+            alert('Por favor, complete todos los campos');
+            setIsLoading(false);
+            return;
+        }
 
-      setNombre('');
-      setDireccion('');
-      setTelefono('');
-      setProducto(null);
-      setCategoria(null);
-      setQuilates('');
-      setPrecioTotal('');
-      setFormaPago('');
-      setAbonoInicial('');
-      setProductos([]);
+        const montoActual = abonoInicial
+            ? Math.max(0, parseFloat(precioTotal) - parseFloat(abonoInicial))
+            : parseFloat(precioTotal);
 
-      navigate('worker-dashboard');  // Volver a la pantalla anterior
-    } catch (error) {
-      console.error('Error al agregar cliente:', error);
-      alert('Error', 'Hubo un problema al agregar el cliente');
-    }
-     finally {
-      setIsLoading(false);
-    }
-    console.log({
-      nombre,
-      direccion,
-      telefono,
-      producto_id: producto?.value,
-      quilates: parseFloat(quilates),
-      precio_total: parseFloat(precioTotal),
-      forma_pago: formaPago?.value,
-      monto_actual: montoActual,
-    });
-    
-  };
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No se encontró un token de autenticación');
 
+            await axios.post(
+                'http://localhost:3000/api/clientes',
+                {
+                    nombre,
+                    direccion,
+                    telefono,
+                    producto_id: producto,
+                    precio_total: parseFloat(precioTotal),
+                    forma_pago: formaPago,
+                    monto_actual: montoActual,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-  return (
-    <div className="form-container">
-      <h1 className="title">Agregar Cliente</h1>
+            alert('Éxito', 'Cliente agregado exitosamente');
+            setNombre('');
+            setDireccion('');
+            setTelefono('');
+            setProducto(null);
+            setCategoria(null);
+            setPrecioTotal('');
+            setFormaPago('');
+            setAbonoInicial('');
+            setProductos([]);
+        } catch (error) {
+            console.error('Error al agregar cliente:', error);
+            alert('Hubo un problema al agregar el cliente');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-      <input
-        type="text"
-        className="input"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        placeholder="Nombre"
-      />
-      <input
-        type="text"
-        className="input"
-        value={direccion}
-        onChange={(e) => setDireccion(e.target.value)}
-        placeholder="Dirección"
-      />
-      <input
-        type="text"
-        className="input"
-        value={telefono}
-        onChange={(e) => setTelefono(e.target.value)}
-        placeholder="Teléfono"
-        pattern="[0-9]*"
-      />
+    return (
+        <div style={{ padding: '20px', backgroundColor: '#101010' }}>
+            <h2 style={{ textAlign: 'center', color: '#f5c469' }}>Agregar Cliente</h2>
 
-      <Select
-        options={categorias}
-        value={categoria}
-        onChange={(value) => {
-          setCategoria(value);
-          fetchProductosPorCategoria(value.value);
-        }}
-        placeholder="Categoría"
-      />
+            <FloatingLabelInput label="Nombre" value={nombre} onChangeText={setNombre} />
+            <FloatingLabelInput label="Dirección" value={direccion} onChangeText={setDireccion} />
+            <FloatingLabelInput label="Teléfono" value={telefono} onChangeText={setTelefono} type="tel" />
 
-      <Select
-        options={productos}
-        value={producto}
-        onChange={(value) => setProducto(value)}
-        placeholder="Producto"
-      />
+            <button onClick={() => setModalVisible(true)} style={styles.inputPicker}>
+                {searchText || 'Selecciona una categoría'}
+            </button>
+            {modalVisible && (
+                <div style={styles.modalContainer}>
+                    <input
+                        style={styles.inputBuscador}
+                        type="text"
+                        placeholder="Buscar categoría"
+                        value={searchText}
+                        onChange={(e) => handleSearch(e.target.value)}
+                    />
+                    <ul>
+                        {filteredCategorias.map((item) => (
+                            <li key={item.id_categoria} onClick={() => handleSelectCategoria(item.id_categoria, item.nombre)}>
+                                {item.nombre}
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setModalVisible(false)} style={styles.closeButton}>
+                        Cerrar
+                    </button>
+                </div>
+            )}
 
-      <input
-        type="number"
-        className="input"
-        value={quilates}
-        onChange={(e) => setQuilates(e.target.value)}
-        placeholder="Quilates"
-      />
-      <input
-        type="number"
-        className="input"
-        value={precioTotal}
-        onChange={(e) => setPrecioTotal(e.target.value)}
-        placeholder="Precio Total"
-      />
-      <input
-        type="number"
-        className="input"
-        value={abonoInicial}
-        onChange={(e) => setAbonoInicial(e.target.value)}
-        placeholder="Abono Inicial (Opcional)"
-      />
+            <button
+                onClick={() => {
+                    if (!categoria) {
+                        alert('Por favor, selecciona una categoría primero.');
+                        return;
+                    }
+                    setModalProductosVisible(true);
+                }}
+                style={styles.inputPicker}
+            >
+                {producto ? productos.find((p) => p.id_producto === producto)?.nombre : 'Selecciona un producto'}
+            </button>
 
-      <Select
-        options={[
-          { label: 'Diario', value: 'diario' },
-          { label: 'Semanal', value: 'semanal' },
-        ]}
-        value={formaPago}
-        onChange={(value) => setFormaPago(value)} // Directamente actualizamos el objeto
-        placeholder="Forma de Pago"
-      />
+            {modalProductosVisible && (
+                <div style={styles.modalContainer}>
+                    <input
+                        style={styles.inputBuscador}
+                        type="text"
+                        placeholder="Buscar producto"
+                        value={searchProductText}
+                        onChange={(e) => handleSearchProduct(e.target.value)}
+                    />
+                    <ul>
+                        {filteredProductos.map((item) => (
+                            <li key={item.id_producto} onClick={() => handleSelectProducto(item.id_producto, item.nombre)}>
+                                {item.nombre}
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setModalProductosVisible(false)} style={styles.closeButton}>
+                        Cerrar
+                    </button>
+                </div>
+            )}
 
-      <div className="button-container">
-        {isLoading ? (
-          <div className="loading">Cargando...</div>
-        ) : (
-          <button className="button" onClick={handleAddCliente}>
-            Agregar Cliente
-          </button>
-        )}
-      </div>
-    </div>
-  );
+            <FloatingLabelInput label="Precio Total" value={precioTotal} onChangeText={setPrecioTotal} type="number" />
+            <FloatingLabelInput label="Abono Inicial (Opcional)" value={abonoInicial} onChangeText={setAbonoInicial} type="number" />
+
+            <select onChange={(e) => setFormaPago(e.target.value)} value={formaPago} style={styles.dropdown}>
+                <option value="">Forma de Pago</option>
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+            </select>
+
+            <div style={styles.buttonContainer}>
+                {isLoading ? (
+                    <div>Loading...</div>
+                ) : (
+                    <button style={styles.button} onClick={handleAddCliente}>
+                        Agregar Cliente
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const styles = {
+    inputPicker: {
+        backgroundColor: '#fff',
+        borderRadius: '10px',
+        padding: '12px',
+        marginBottom: '15px',
+        color: '#000',
+        cursor: 'pointer',
+    },
+    modalContainer: {
+        padding: '20px',
+        backgroundColor: '#101010',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        overflowY: 'scroll',
+        zIndex: '100',
+    },
+    inputBuscador: {
+        height: '45px',
+        borderColor: '#707070',
+        borderWidth: '1px',
+        borderRadius: '10px',
+        padding: '12px',
+        color: '#d1a980',
+        backgroundColor: '#1e1e1e',
+        fontSize: '16px',
+    },
+    closeButton: {
+        marginTop: '20px',
+        backgroundColor: '#f5c469',
+        color: '#fff',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+    },
+    dropdown: {
+        backgroundColor: '#1e1e1e',
+        color: '#f5c469',
+        borderRadius: '10px',
+        padding: '12px',
+        width: '100%',
+        marginBottom: '15px',
+    },
+    buttonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    button: {
+        backgroundColor: '#f5c469',
+        color: '#101010',
+        border: 'none',
+        borderRadius: '10px',
+        padding: '12px 20px',
+        fontSize: '16px',
+        cursor: 'pointer',
+    },
 };
 
 export default NuevoCliente;

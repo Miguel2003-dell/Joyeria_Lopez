@@ -16,7 +16,7 @@ const AdminDashboard = () => {
                 throw new Error('Token no encontrado');
             }
 
-            const response = await axios.get('http://localhost:3000/trabajadores', {
+            const response = await axios.get('http://localhost:3000/api/trabajadores/conteo', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -34,10 +34,6 @@ const AdminDashboard = () => {
         return () => clearInterval(interval); // Limpiar el intervalo cuando el componente se desmonte
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/ruta'); // Redirigir a la página de login
-    };
 
     const handleSearch = (text) => {
         setSearchText(text);
@@ -66,9 +62,6 @@ const AdminDashboard = () => {
                     <TrabajadorCard key={item.id} trabajador={item} />
                 ))}
             </ul>
-            <button style={styles.logoutButton} onClick={handleLogout}>
-                Cerrar sesión
-            </button>
         </div>
     );
 };

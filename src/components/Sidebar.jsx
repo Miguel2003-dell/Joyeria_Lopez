@@ -34,9 +34,11 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
   // Definir los enlaces según el rol
   const linksArray = userRole === "Administrador"
   ? [
-      { label: "Admin Dashboard", icon: <AiOutlineHome />, to: "/admin-dashboard" },
-      { label: "Usuarios", icon: <AiOutlineUser />, to: "/admin-usuarios" },
-      { label: "Estadísticas", icon: <MdOutlineAnalytics />, to: "/admin-estadisticas" }
+      { label: "Inicio", icon: <AiOutlineHome />, to: "/admin-dashboard" },
+      { label: "Nuevo Trabajador", icon: <AiOutlineUser />, to: "/nuevo-trabajador" },
+      { label: "Agregar Producto", icon: <AiOutlineUser />, to: "/agregar-producto" },
+      { label: "Ver Joyería", icon: <AiOutlineUser />, to: "/ver-joyeria" },
+      { label: "Estadísticas", icon: <MdOutlineAnalytics />, to: "/estadistica" }
     ]
   : userRole === "Trabajador"
   ? [
@@ -296,7 +298,7 @@ const Container = styled.div`
               height: 0;
               &:checked + .slider:before {
                 left: 4px;
-                content: "🌑";
+                content: "☀️";
                 transform: translateX(26px);
               }
             }
@@ -313,7 +315,7 @@ const Container = styled.div`
               transition: 0.4s;
               &::before {
                 position: absolute;
-                content: "☀️";
+                content: "🌑";
                 height: 0px;
                 width: 0px;
                 left: -10px;
