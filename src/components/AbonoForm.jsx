@@ -53,7 +53,7 @@ const AbonoForm = ({ clienteId, onAddAbono }) => {
                 type="number"
             />
             <button
-                style={{ ...styles.button, ...(loading ? styles.buttonDisabled : {}) }}
+                style={{ ...styles.buttonadd, ...(loading ? styles.buttonDisabled : {}) }}
                 onClick={handleAddAbono}
                 disabled={loading}
             >
@@ -90,7 +90,7 @@ const styles = {
         color: '#d1a980',
         marginBottom: '15px',
     },
-    button: {
+    buttonadd: {
         backgroundColor: '#d4af37',
         borderRadius: '10px',
         padding: '10px',

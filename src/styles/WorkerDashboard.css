@@ -1,71 +1,66 @@
-.worker-dashboard-container {
-    background-color: #f4f4f4;
+.dashboard-container {
+    background-color: #121212;
+    color: #f5c469;
     padding: 20px;
+    min-height: 100vh;
 }
 
-.worker-header-container {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 20px;
 }
 
-.worker-title {
-    font-size: 24px;
-    color: #333;
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
 }
 
-.worker-logout-icon {
+.logout-button {
+    background-color: #ff6347;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
-}
-
-.worker-search-input-container {
-    margin-top: 20px;
-}
-
-.worker-search-input {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    width: 100%;
-}
-
-.worker-scroll-content {
-    margin-top: 20px;
-}
-
-.worker-empty-message {
     font-size: 16px;
-    color: #777;
 }
 
-.worker-cliente-list {
+.search-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
-.worker-accordion-header {
-    background-color: #f1f1f1;
-    padding: 15px;
-    border-radius: 10px;
+.search-input {
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    max-width: 500px;
+    padding: 10px;
+    border: 1px solid #707070;
+    border-radius: 8px;
+    background-color: #1e1e1e;
+    color: #d1a980;
+}
+
+.tab-view button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #1c1c1e;
+    color: #fff;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.worker-accordion-title {
-    font-size: 18px;
-    color: #333;
+.client-list {
+    margin-top: 20px;
 }
 
-.worker-accordion-content {
-    padding: 10px;
-    margin-top: 10px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-}
-
-.worker-accordion-content .worker-cliente-list {
-    margin-top: 10px;
+.empty-message {
+    text-align: center;
+    margin-top: 20px;
+    color: #fff;
+    font-size: 16px;
 }
