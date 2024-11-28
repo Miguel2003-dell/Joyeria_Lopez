@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import TrabajadorCard from '../components/TrabajadorCard';
@@ -7,33 +7,38 @@ const AdminDashboard = () => {
     const [trabajadores, setTrabajadores] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [filteredTrabajadores, setFilteredTrabajadores] = useState([]);
-    const navigate  = useNavigate(); // Hook de navegación
+    const navigate = useNavigate();
 
     const fetchTrabajadores = async () => {
         try {
-            const token = localStorage.getItem('token'); // Usamos localStorage para la web
-            if (!token) {
-                throw new Error('Token no encontrado');
-            }
+            const token = localStorage.getItem('token');
+            if (token) {
+                const response = await axios.get('http://localhost:3000/api/trabajadores/conteo', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-            const response = await axios.get('http://localhost:3000/api/trabajadores/conteo', {
-                headers: {
-                    Authorization: `Bearer ${token}`
+                if (Array.isArray(response.data)) {
+                    setTrabajadores(response.data);
+                    setFilteredTrabajadores(response.data);
+                } else {
+                    console.error("Los datos devueltos no son un array:", response.data);
+                    setTrabajadores([]);
+                    setFilteredTrabajadores([]);
                 }
-            });
-            setTrabajadores(response.data);
-            setFilteredTrabajadores(response.data);
+            }
         } catch (error) {
             console.error('Error al obtener trabajadores:', error);
         }
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         fetchTrabajadores();
-        const interval = setInterval(fetchTrabajadores, 5000); // Polling cada 5 segundos
-        return () => clearInterval(interval); // Limpiar el intervalo cuando el componente se desmonte
     }, []);
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
 
     const handleSearch = (text) => {
         setSearchText(text);
@@ -47,60 +52,105 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleEditTrabajador = (updatedTrabajador) => {
+        setTrabajadores((prevTrabajadores) =>
+            prevTrabajadores.map((trabajador) =>
+                trabajador.id_usuario === updatedTrabajador.id_usuario ? updatedTrabajador : trabajador
+            )
+        );
+    };
+
+    const handleDeleteTrabajador = (id) => {
+        setTrabajadores(trabajadores.filter(trabajador => trabajador.id_usuario !== id));
+        setFilteredTrabajadores(filteredTrabajadores.filter(trabajador => trabajador.id_usuario !== id));
+    };
+
     return (
         <div style={styles.container}>
-            <h1 style={styles.title}>Lista de trabajadores</h1>
-            <input
-                type="text"
-                style={styles.searchInput}
-                placeholder="Buscar por nombre"
-                value={searchText}
-                onChange={(e) => handleSearch(e.target.value)}
-            />
-            <ul style={styles.list}>
-                {filteredTrabajadores.map((item) => (
-                    <TrabajadorCard key={item.id} trabajador={item} />
+            <div style={styles.header}>
+                <h1 style={styles.title}>Lista de trabajadores</h1>
+                <button style={styles.logoutButton} onClick={handleLogout}>
+                    <i className="fas fa-sign-out-alt" style={{ fontSize: 24, color: '#ff6347' }} />
+                </button>
+            </div>
+            <div style={styles.searchContainer}>
+                <i className="fas fa-search" style={styles.searchIcon}></i>
+                <input
+                    style={styles.searchInput}
+                    type="text"
+                    placeholder="Buscar por nombre"
+                    value={searchText}
+                    onChange={(e) => handleSearch(e.target.value)}
+                />
+            </div>
+            <div style={styles.listContent}>
+                {filteredTrabajadores.map((trabajador) => (
+                    <TrabajadorCard
+                        key={trabajador.id_usuario}
+                        trabajador={trabajador}
+                        onDelete={handleDeleteTrabajador}
+                        onEdit={handleEditTrabajador}
+                    />
                 ))}
-            </ul>
+            </div>
         </div>
     );
 };
 
 const styles = {
     container: {
+        display: 'flex',
+        flexDirection: 'column',
         padding: '20px',
-        backgroundColor: '#1c1c1e', // Fondo oscuro
+        backgroundColor: '#121212',
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
     },
     title: {
-        fontSize: '24px',
+        fontSize: '28px',
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#f5c469',
+        letterSpacing: '0.8px',
+    },
+    searchContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#1e1e1e',
+        borderColor: '#707070',
+        borderWidth: '1px',
+        borderRadius: '10px',
         marginBottom: '20px',
+        padding: '12px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
+    },
+    searchIcon: {
+        marginRight: '8px',
+        color: '#d1a980',
     },
     searchInput: {
-        height: '40px',
-        borderColor: '#ccc',
-        borderWidth: '1px',
-        borderRadius: '5px',
-        marginBottom: '20px',
-        padding: '0 10px',
-        backgroundColor: '#fff', // Fondo de entrada
-        color: '#000', // Color de texto
-        width: '300px',
+        flex: 1,
+        height: '45px',
+        color: '#d1a980',
+        fontSize: '16px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        outline: 'none',
+    },
+    listContent: {
+        paddingBottom: '20px',
     },
     logoutButton: {
-        marginTop: '20px',
-        padding: '10px 20px',
-        backgroundColor: '#2e5c74', // Color de fondo
+        padding: '5px 10px',
+        backgroundColor: '#2e2e2e',
         borderRadius: '5px',
-        color: '#fff',
-        fontWeight: 'bold',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
         border: 'none',
         cursor: 'pointer',
-    },
-    list: {
-        listStyleType: 'none',
-        padding: 0,
     },
 };
 

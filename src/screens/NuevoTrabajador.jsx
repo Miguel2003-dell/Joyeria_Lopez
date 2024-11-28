@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import FloatingLabelInput from '../components/FloatingLabelInput'; // Importa el componente reutilizable
+import { useNavigate } from 'react-router-dom';
 
 const NuevoTrabajador = () => {
     const [nombre, setNombre] = useState('');
@@ -9,31 +9,62 @@ const NuevoTrabajador = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [token, setToken] = useState('');
 
-    const token = localStorage.getItem('token');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const getToken = async () => {
+            const token = localStorage.getItem('token');
+            setToken(token);
+        };
+        getToken();
+    }, []);
 
     const handleAddTrabajador = async () => {
         if (!nombre || !apellidos || !email || !password) {
             alert("Por favor, complete todos los campos");
             return;
         }
+
+        // Validar email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("Por favor, ingrese un correo electrónico válido");
+            return;
+        }
+
+        // Validar contraseña (mínimo 6 caracteres)
+        if (password.length < 6) {
+            alert("La contraseña debe tener al menos 6 caracteres");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
             const data = { nombre, apellidos, email, password, role };
-            const response = await axios.post('http://localhost:3000/api/trabajadores/agregar', data, config);
+            const response = await axios.post(
+                "http://localhost:3000/api/trabajadores/agregar",
+                data,
+                config
+            );
 
             if (response.status === 201) {
-                alert('Trabajador agregado exitosamente');
-                // Redireccionar a la página anterior
-                window.history.back();
+                alert("Éxito: Trabajador agregado exitosamente");
+                navigate("/admin-dashboard");
             } else {
-                alert('Error al agregar el trabajador');
+                alert("Error: Error al agregar el trabajador");
             }
         } catch (error) {
-            const errorMessage = error.response?.status === 400 ? 'Correo ya registrado' : 'Ocurrió un error';
-            alert(errorMessage);
+            console.error(
+                "Error:",
+                error.response ? error.response.data : error.message
+            ); // Muestra más detalles en consola
+            const errorMessage =
+                error.response?.data?.message || "Ocurrió un error desconocido";
+            alert("Error: " + errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -41,52 +72,73 @@ const NuevoTrabajador = () => {
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.header}>Agregar Nuevo Trabajador</h1>
+            <div style={{ paddingBottom: 20 }}>
+                <h2 style={styles.header}>Agregar Nuevo Trabajador</h2>
 
-            <FloatingLabelInput
-                label="Nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-            />
-            <FloatingLabelInput
-                label="Apellidos"
-                value={apellidos}
-                onChange={(e) => setApellidos(e.target.value)}
-            />
-            <FloatingLabelInput
-                label="Correo Electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <FloatingLabelInput
-                label="Contraseña"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+                <div style={styles.inputContainer}>
+                    <label style={styles.label}>Nombre</label>
+                    <input
+                        type="text"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.inputContainer}>
+                    <label style={styles.label}>Apellidos</label>
+                    <input
+                        type="text"
+                        value={apellidos}
+                        onChange={(e) => setApellidos(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.inputContainer}>
+                    <label style={styles.label}>Correo Electrónico</label>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.inputContainer}>
+                    <label style={styles.label}>Contraseña</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
 
-            <div style={styles.pickerContainer}>
-                <label htmlFor="role" style={styles.pickerLabel}>Rol</label>
-                <select
-                    id="role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    style={styles.picker}
-                >
-                    <option value="">Seleccionar</option>
-                    <option value="trabajador">Trabajador</option>
-                    <option value="Administrador">Administrador</option>
-                </select>
-            </div>
+                <div style={styles.inputContainer}>
+                    <label style={styles.label}>Rol</label>
+                    <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        style={styles.select}
+                    >
+                        <option value="">Selecciona un rol</option>{" "}
+                        {/* Opción vacía para obligar a elegir */}
+                        <option value="trabajador">Trabajador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
 
-            <div style={styles.buttonContainer}>
-                {isLoading ? (
-                    <div style={styles.loader}>Cargando...</div>
-                ) : (
-                    <button style={styles.button} onClick={handleAddTrabajador}>
-                        Agregar Trabajador
-                    </button>
-                )}
+                <div style={styles.buttonContainer}>
+                    {isLoading ? (
+                        <div style={styles.loader}>Cargando...</div>
+                    ) : (
+                        <button
+                            style={styles.button}
+                            onClick={handleAddTrabajador}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Cargando..." : "Agregar Trabajador"}
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -94,49 +146,57 @@ const NuevoTrabajador = () => {
 
 const styles = {
     container: {
-        maxWidth: '600px',
-        margin: '0 auto',
         padding: '20px',
         backgroundColor: '#101010',
-        borderRadius: '8px',
-        color: '#fff',
     },
     header: {
-        fontSize: '24px',
+        fontSize: '28px',
         fontWeight: 'bold',
         color: '#f5c469',
         textAlign: 'center',
         marginBottom: '20px',
     },
-    pickerContainer: {
+    inputContainer: {
         marginBottom: '15px',
     },
-    pickerLabel: {
-        display: 'block',
+    label: {
+        color: '#fff',
         marginBottom: '5px',
+        display: 'block',
     },
-    picker: {
+    input: {
         width: '100%',
         padding: '10px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
+        backgroundColor: '#1a1a1a',
+        color: '#fff',
+        borderRadius: '5px',
+        border: 'none',
+        marginBottom: '10px',
+    },
+    select: {
+        width: '100%',
+        padding: '10px',
+        backgroundColor: '#1a1a1a',
+        color: '#fff',
+        borderRadius: '5px',
+        border: 'none',
     },
     buttonContainer: {
         marginTop: '20px',
     },
     button: {
         backgroundColor: '#d4af37',
+        padding: '12px 30px',
+        borderRadius: '10px',
         color: '#000',
         fontWeight: 'bold',
-        fontSize: '16px',
-        padding: '10px 20px',
+        fontSize: '18px',
         border: 'none',
-        borderRadius: '5px',
         cursor: 'pointer',
     },
     loader: {
-        color: '#d4af37',
         textAlign: 'center',
+        color: '#fff',
     },
 };
 

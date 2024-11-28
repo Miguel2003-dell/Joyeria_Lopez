@@ -1,152 +1,199 @@
 import React, { useState } from 'react';
-import { Modal, Button, IconButton, Typography, List, ListItem, ListItemText } from '@mui/material'; 
-import { Edit, Delete, Download, Work, Group } from '@mui/icons-material';
 import axios from 'axios';
 
-const TrabajadorCard = ({ trabajador, onDelete, onEdit }) => {
-    const [showClientes, setShowClientes] = useState(false);
-    const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [clientes, setClientes] = useState([]); // Estado para almacenar los clientes
+const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
+  const [showClientes, setShowClientes] = useState(false);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
-    // Función de edición
-    const handleEdit = () => {
-        // Navega a la página de edición del trabajador
-        onEdit(trabajador); // Suponiendo que onEdit maneja la lógica para navegar o abrir el modal
-    };
+  const handlePress = () => {
+    setShowClientes(!showClientes);
+    if (!showClientes && onViewClientes) {
+      onViewClientes(trabajador.id_usuario);
+    }
+  };
 
-    // Función para abrir el modal de eliminación
-    const handleDeleteModalOpen = () => {
-        setDeleteModalVisible(true);
-    };
+  const handleEdit = () => {
+    if (onEdit) onEdit(trabajador);
+  };
 
-    // Función para cerrar el modal de eliminación
-    const handleDeleteModalClose = () => {
-        setDeleteModalVisible(false);
-    };
+  const handleDeleteModalOpen = () => {
+    setDeleteModalVisible(true);
+  };
 
-    // Confirmar eliminación del trabajador
-    const confirmDelete = () => {
-        axios.delete(`http://localhost:3000/api/trabajadores/eliminar/${trabajador.id_usuario}`)
-            .then(() => {
-                handleDeleteModalClose();
-                onDelete(trabajador.id_usuario); // Llama a la función de eliminación
-            })
-            .catch(error => {
-                const errorMessage = error.response?.data?.message || 'Error desconocido al eliminar el trabajador';
-                console.error(errorMessage);
-            });
-    };
+  const handleDeleteModalClose = () => {
+    setDeleteModalVisible(false);
+  };
 
-    // Función para exportar los datos de clientes
-    const handleExport = async () => {
-        try {
-            const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
-            const clientes = response.data.clientes || [];
+  const confirmDelete = () => {
+    axios
+      .delete(`http://localhost:3000/api/trabajadores/eliminar/${trabajador.id_usuario}`)
+      .then(() => {
+        handleDeleteModalClose();
+        if (onDelete) onDelete(trabajador.id_usuario);
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el trabajador:', error.message);
+      });
+  };
 
-            if (!Array.isArray(clientes)) {
-                throw new Error('La respuesta de la API no es válida');
-            }
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
+      const clientes = response.data.clientes || [];
+      const csvContent = clientes
+        .map(
+          (cliente) =>
+            `${cliente.id_cliente},${cliente.nombre},${cliente.telefono},${cliente.direccion},${cliente.email},${cliente.monto_actual}`
+        )
+        .join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `clientes_trabajador_${trabajador.nombre}_${trabajador.apellidos}.csv`;
+      link.click();
+    } catch (error) {
+      console.error('Error al exportar clientes:', error.message);
+    }
+  };
 
-            const conMonto = clientes.filter(cliente => parseFloat(cliente.monto_actual) > 0);
-            const sinMonto = clientes.filter(cliente => parseFloat(cliente.monto_actual) === 0);
-
-            const formatToCSV = (data, title) => {
-                const rows = data.map(cliente => `${cliente.id_cliente},${cliente.nombre},${cliente.telefono},${cliente.direccion},${cliente.email},${cliente.monto_actual}`).join('\n');
-                return `${title}\nNo.,Nombre completo,direccion,telefono,Correo,Por Pagar\n${rows}`;
-            };
-
-            const csvContent = [
-                '\ufeff',
-                formatToCSV(conMonto, 'Clientes Activos'),
-                formatToCSV(sinMonto, 'Clientes Finalizados'),
-            ].join('\n\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `clientes_trabajador_${trabajador.nombre}_${trabajador.apellidos}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Error al exportar clientes:', error.message || error);
-        }
-    };
-
-    // Función para mostrar/ocultar los clientes
-    const handleShowClientes = async () => {
-        if (!showClientes) {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
-                setClientes(response.data.clientes || []); // Guardamos los clientes obtenidos
-            } catch (error) {
-                console.error('Error al obtener clientes:', error.message || error);
-            }
-        }
-        setShowClientes(prev => !prev); // Alterna el estado después de hacer la llamada
-    };
-
-    return (
-        <div className="card">
-            <div className="header">
-                <Typography variant="h6">{`${trabajador.nombre} ${trabajador.apellidos}`}</Typography>
-                <div className="icon-container">
-                    <IconButton onClick={handleEdit} color="primary">
-                        <Edit />
-                    </IconButton>
-                    <IconButton onClick={handleDeleteModalOpen} color="error">
-                        <Delete />
-                    </IconButton>
-                    <IconButton onClick={handleExport} color="success">
-                        <Download />
-                    </IconButton>
-                </div>
-            </div>
-            <div className="row">
-                <Work style={{ color: '#f5c469' }} />
-                <Typography>{trabajador.rol}</Typography>
-            </div>
-            <div className="row">
-                <Group style={{ color: '#f5c469' }} />
-                <Typography>{trabajador.cliente_count} Clientes</Typography>
-            </div>
-            <Button variant="contained" color="warning" onClick={handleShowClientes}>
-                {showClientes ? 'Ocultar clientes' : 'Ver clientes'}
-            </Button>
-
-            {showClientes && (
-                <div>
-                    <Typography variant="h6">Clientes:</Typography>
-                    <List>
-                        {clientes.map(cliente => (
-                            <ListItem key={cliente.id_cliente}>
-                                <ListItemText
-                                    primary={cliente.nombre}
-                                    secondary={`Monto: ${cliente.monto_actual}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-                </div>
-            )}
-
-            <Modal open={isDeleteModalVisible} onClose={handleDeleteModalClose}>
-                <div className="modal-content">
-                    <Typography variant="h6">Eliminar Trabajador</Typography>
-                    <Typography>¿Estás seguro de que deseas eliminar a este trabajador?</Typography>
-                    <div className="modal-buttons">
-                        <Button variant="outlined" onClick={handleDeleteModalClose}>
-                            Cancelar
-                        </Button>
-                        <Button variant="contained" color="error" onClick={confirmDelete}>
-                            Eliminar
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+  return (
+    <div style={styles.card}>
+      <div style={styles.header}>
+        <h3 style={styles.cardName}>
+          {trabajador.nombre} {trabajador.apellidos}
+        </h3>
+        <div style={styles.iconContainer}>
+          <button style={styles.iconButton} onClick={handleEdit}>
+            ✏️
+          </button>
+          <button style={styles.iconButton} onClick={handleDeleteModalOpen}>
+            🗑️
+          </button>
+          <button style={styles.iconButton} onClick={handleExport}>
+            📥
+          </button>
         </div>
-    );
+      </div>
+      <div style={styles.row}>
+        <span>👜</span>
+        <p style={styles.cardText}>{trabajador.rol}</p>
+      </div>
+      <div style={styles.row}>
+        <span>👥</span>
+        <p style={styles.cardText}>{trabajador.cliente_count} Clientes</p>
+      </div>
+      <button onClick={handlePress} style={styles.detailsButton}>
+        Ver clientes
+      </button>
+
+      {isDeleteModalVisible && (
+        <div style={styles.modalContainer}>
+          <div style={styles.modalContent}>
+            <h4 style={styles.modalTitle}>Eliminar Trabajador</h4>
+            <p style={styles.modalText}>
+              ¿Estás seguro de que deseas eliminar a este trabajador?
+            </p>
+            <div style={styles.modalButtons}>
+              <button style={styles.modalButtonCancel} onClick={handleDeleteModalClose}>
+                Cancelar
+              </button>
+              <button style={styles.modalButtonDelete} onClick={confirmDelete}>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  card: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: '12px',
+    padding: '20px',
+    margin: '10px 0',
+    color: '#fff',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    display: 'flex',
+    gap: '10px',
+  },
+  iconButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '18px',
+    color: '#4a90e2',
+  },
+  row: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: '10px 0',
+  },
+  cardName: {
+    color: '#f5c469',
+  },
+  cardText: {
+    marginLeft: '8px',
+  },
+  detailsButton: {
+    marginTop: '15px',
+    padding: '10px',
+    backgroundColor: '#d4af37',
+    borderRadius: '8px',
+    border: 'none',
+    color: '#000',
+    cursor: 'pointer',
+  },
+  modalContainer: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#333',
+    borderRadius: '10px',
+    padding: '20px',
+    textAlign: 'center',
+    color: '#fff',
+  },
+  modalTitle: {
+    color: '#f5c469',
+  },
+  modalButtons: {
+    marginTop: '15px',
+    display: 'flex',
+    justifyContent: 'space-around',
+  },
+  modalButtonCancel: {
+    backgroundColor: '#888',
+    color: '#fff',
+    border: 'none',
+    padding: '10px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+  },
+  modalButtonDelete: {
+    backgroundColor: '#e74c3c',
+    color: '#fff',
+    border: 'none',
+    padding: '10px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+  },
 };
 
 export default TrabajadorCard;
