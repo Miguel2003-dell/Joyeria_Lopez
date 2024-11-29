@@ -48,9 +48,12 @@ const LoginScreen = () => {
 
             if (response.data && response.data.token) {
                 const { token } = response.data;
+                console.log("Token recibido:", token); 
                 localStorage.setItem("token", token);
 
                 const decoded = decodeJWT(token);
+                console.log("Token decodificado:", decoded); // Verifica la decodificación
+
                 if (!decoded || !decoded.role) {
                     setAlertMessage("Error al obtener el rol del usuario.");
                     setAlertType("error");

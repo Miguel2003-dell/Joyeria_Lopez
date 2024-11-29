@@ -1,235 +1,120 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
-import { IoLocationOutline, IoCallOutline } from "react-icons/io5";
-import AbonoForm from "../components/AbonoForm";
-import { useSpring, animated } from "@react-spring/web";
-import { toast } from "react-toastify";
-import { isBefore, parseISO } from "date-fns";
-import { ClipLoader } from "react-spinners"; // Asegúrate de tener esta línea en el import
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import AbonoForm from '../components/AbonoForm';
+import { useParams } from 'react-router-dom';
 
 const ClienteDetails = () => {
-    const { id } = useParams();
-    console.log(id); // Deberías ver el id de la URL (por ejemplo, 25)
+    const { id } = useParams(); // Extract ID from route
+    console.log('Client ID:', id); // Debug to ensure ID is correct
     const [cliente, setCliente] = useState(null);
     const [abonos, setAbonos] = useState([]);
+    const [productos, setProductos] = useState([]);
     const [isAbonosVisible, setIsAbonosVisible] = useState(false);
-    const navigate = useNavigate();
-
-    const scaleStyle = useSpring({ scale: isAbonosVisible ? 1 : 0.95 });
-    const fadeAndTranslateStyle = useSpring({
-        opacity: isAbonosVisible ? 1 : 0,
-        transform: isAbonosVisible ? "translateY(0px)" : "translateY(10px)",
-    });
+    const [modalVisible, setModalVisible] = useState(false);
+    const fadeAnim = useRef(0); // For animations (can use CSS)
 
     useEffect(() => {
-        const fetchClienteDetails = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const response = await axios.get(
-                    `http://localhost:3000/api/clientes/${id}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-                if (response.data) {
-                    setCliente(response.data);
-                }
-
-                const abonosResponse = await axios.get(
-                    `http://localhost:3000/api/clientes/${id}/abonos`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-                const abonosOrdenados = abonosResponse.data.sort(
-                    (a, b) => new Date(b.fecha) - new Date(a.fecha)
-                );
-                setAbonos(abonosOrdenados);
-            } catch (error) {
-                console.error(
-                    "Error al obtener los detalles del cliente:",
-                    error
-                );
-                setCliente(null);
-                toast.error(
-                    "Hubo un error al obtener los detalles del cliente."
-                );
-            }
-        };
-
-        fetchClienteDetails();
-    }, [id]);
-
-    useEffect(() => {
-        if (cliente?.estado === "completado") {
-            toast.success("El cliente ha completado todos los pagos.");
-            window.alert(
-                "Pagos Completados",
-                "El cliente ha completado todos los pagos.",
-                [
-                    {
-                        text: "Aceptar",
-                        onClick: () => navigate("/worker-dashboard"),
-                    },
-                ]
-            );
+        if (id) {
+            fetchDetails();
+            fetchProductos();
+        } else {
+            console.error("ID no definido. Asegúrate de que el ID del cliente se pase correctamente.");
         }
-    }, [cliente, navigate]);
+    }, [id]);
+    
+
+    const fetchProductos = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/clientes/${id}/productos`);
+            setProductos(response.data);
+        } catch (error) {
+            console.error('Error fetching productos:', error);
+            alert('Hubo un problema al cargar los productos. Por favor, inténtalo de nuevo.');
+        }
+    };
+    
+
+    const fetchDetails = async () => {
+        try {
+            const clienteResponse = await axios.get(`http://localhost:3000/api/clientes/${id}`);
+            setCliente(clienteResponse.data);
+
+            const abonosResponse = await axios.get(`http://localhost:3000/api/clientes/${id}/abonos`);
+            setAbonos(
+                abonosResponse.data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            );
+        } catch (error) {
+            console.error('Error fetching details:', error);
+        }
+    };
 
     const handleAddAbono = () => {
-        window.alert(
-            "Pago agregado con éxito",
-            "El pago se ha agregado correctamente."
-        );
+        fetchDetails();
+        alert('Pago agregado con éxito');
     };
 
-    const handleNoAbono = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-    
-            const today = new Date(); // Obtenemos el objeto Date directamente
-            const todayISOString = today.toISOString().split("T")[0]; // Convertimos a ISO
-            const fechaProximoPago = parseISO(cliente?.fecha_proximo_pago); // Asegúrate de que la fecha esté en formato ISO
-    
-            if (isBefore(today, fechaProximoPago)) {
-                window.alert(
-                    `No se puede realizar esta acción hasta la fecha de pago: ${fechaProximoPago.toLocaleDateString()}.`
-                );
-                return;
-            }
-    
-            const lastNoAbonoDate = localStorage.getItem(`lastNoAbonoDate_${id}`);
-            if (lastNoAbonoDate === todayISOString) {
-                window.alert(
-                    'El botón de "No abonó" solo se puede presionar una vez al día.'
-                );
-                return;
-            }
-    
-            localStorage.setItem(`lastNoAbonoDate_${id}`, todayISOString);
-    
-            // Actualiza el estado de los abonos con el nuevo "no abonado"
-            setAbonos((prevAbonos) => [
-                ...prevAbonos,
-                {
-                    monto: 0,
-                    fecha: today.toISOString(),
-                    estado: "no_abono",
-                },
-            ]);
-    
-            // Puedes también actualizar el estado de cliente si es necesario
-            setCliente((prevCliente) => ({
-                ...prevCliente,
-                monto_actual: prevCliente.monto_actual, // Mantener el monto actual
-            }));
-    
-            window.alert("El cliente no abonó hoy.");
-        } catch (error) {
-            console.error("Error en la lógica de 'No abonó':", error);
-        }
-    };
-    
-
-    const handleToggleAbonos = () => {
-        setIsAbonosVisible(!isAbonosVisible);
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
     };
 
     return (
         <div style={styles.container}>
             <div style={styles.clientInfo}>
                 <h1 style={styles.clientName}>{cliente?.nombre}</h1>
-                <div style={styles.divider}></div>
-                <div style={styles.infoRow}>
-                    <IoLocationOutline size={18} color="#f5c469" />
-                    <p style={styles.clientDetail}>{cliente?.direccion}</p>
-                </div>
-                <div style={styles.divider}></div>
-                <div style={styles.infoRow}>
-                    <IoCallOutline size={18} color="#f5c469" />
-                    <p style={styles.clientDetail}>{cliente?.telefono}</p>
-                </div>
-                <div style={styles.divider}></div>
-                <p style={styles.clientDetail}>
-                    Monto inicial: {cliente?.precio_total}
-                </p>
-                <div style={styles.divider}></div>
-                <p style={styles.clientDetail}>
-                    Forma de pago: {cliente?.forma_pago}
-                </p>
-                <div style={styles.divider}></div>
-                <p style={styles.clientAmountText}>
-                    Por pagar: {cliente?.monto_actual}
-                </p>
+                <hr style={styles.divider} />
+                <p style={styles.clientDetail}>Dirección: {cliente?.direccion}</p>
+                <p style={styles.clientDetail}>Teléfono: {cliente?.telefono}</p>
+                <p style={styles.clientDetail}>Monto inicial: {cliente?.precio_total}</p>
+                <p style={styles.clientDetail}>Forma de pago: {cliente?.forma_pago}</p>
+                <button style={styles.button} onClick={toggleModal}>
+                    Ver Productos
+                </button>
+                {modalVisible && (
+                    <div style={styles.modal}>
+                        <h2>Lista de Productos</h2>
+                        {productos.length > 0 ? (
+                            productos.map((producto, index) => (
+                                <div key={index} style={styles.productItem}>
+                                    <p>Nombre: {producto.nombre}</p>
+                                    <p>Quilates: {producto.quilates}</p>
+                                    <p>Precio: {producto.precio}</p>
+                                    <p>Cantidad: {producto.cantidad}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No hay productos asociados.</p>
+                        )}
+                        <button onClick={toggleModal} style={styles.closeButton}>
+                            Cerrar
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div style={styles.clientInfo}>
-                <h2 style={styles.sectionTitle}>Realizar abono</h2>
-                {cliente?.monto_actual > 0 ? (
-                    <>
-                        <AbonoForm clienteId={id} onAddAbono={handleAddAbono} />
-                        <animated.div
-                            style={{ ...styles.noAbonoButton, ...scaleStyle }}
-                        >
-                            <button
-                                onClick={handleNoAbono}
-                                disabled={cliente?.monto_actual <= 0}
-                                style={styles.noAbonoButtonText}
-                            >
-                                No abonó
-                            </button>
-                        </animated.div>
-                    </>
-                ) : (
-                    <p style={styles.check}>
-                        El cliente ha completado todos los pagos.
-                    </p>
-                )}
-
+                <h2>Realizar Abono</h2>
+                <AbonoForm clienteId={id} onAddAbono={handleAddAbono} />
                 <button
-                    onClick={handleToggleAbonos}
                     style={styles.toggleButton}
+                    onClick={() => setIsAbonosVisible(!isAbonosVisible)}
                 >
-                    {isAbonosVisible ? "Ocultar" : "Mostrar"} Historial de
-                    Abonos
+                    {isAbonosVisible ? 'Ocultar' : 'Mostrar'} Historial de Abonos
                 </button>
-
-                {isAbonosVisible &&
-                    (abonos.length > 0 ? (
-                        abonos.map((abono, index) => (
-                            <animated.div
-                                key={index}
-                                style={{
-                                    ...styles.abonoItem,
-                                    backgroundColor:
-                                        abono.estado === "no_abono"
-                                            ? "#8b0000"
-                                            : "#006400",
-                                    ...fadeAndTranslateStyle,
-                                }}
-                            >
-                                <p style={styles.abonoText}>
-                                    Monto: {abono.monto}
-                                </p>
-                                <p style={styles.abonoText}>
-                                    Fecha:{" "}
-                                    {new Date(abono.fecha).toLocaleDateString()}
-                                </p>
-                                <p style={styles.abonoText}>
-                                    Estado:{" "}
-                                    {abono.estado === "no_abono"
-                                        ? "No Abonado"
-                                        : "Pagado"}
-                                </p>
-                            </animated.div>
-                        ))
-                    ) : (
-                        <p style={styles.noAbonosText}>
-                            No hay abonos registrados.
-                        </p>
-                    ))}
+                {isAbonosVisible && (
+                    <div>
+                        {abonos.length > 0 ? (
+                            abonos.map((abono, index) => (
+                                <div key={index} style={styles.abonoItem}>
+                                    <p>Monto: {abono.monto}</p>
+                                    <p>Fecha: {new Date(abono.fecha).toLocaleDateString()}</p>
+                                    <p>Estado: {abono.estado === 'no_abono' ? 'No Abonado' : 'Pagado'}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No hay abonos registrados.</p>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -237,99 +122,62 @@ const ClienteDetails = () => {
 
 const styles = {
     container: {
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#0d0d0d",
-        padding: "20px",
+        padding: '20px',
+        backgroundColor: '#0d0d0d',
+        color: '#f5c469',
     },
     clientInfo: {
-        backgroundColor: "#1a1a1a",
-        borderRadius: "15px",
-        padding: "20px",
-        marginBottom: "20px",
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.6)",
+        marginBottom: '20px',
+        padding: '20px',
+        borderRadius: '10px',
+        backgroundColor: '#1a1a1a',
     },
     clientName: {
-        fontSize: "28px",
-        fontWeight: "bold",
-        color: "#f5c469",
-        marginBottom: "12px",
-        textAlign: "center",
-        letterSpacing: "3px",
+        fontSize: '24px',
+        fontWeight: 'bold',
     },
     clientDetail: {
-        fontSize: "16px",
-        color: "#d9d9d9",
-        marginLeft: "10px",
-    },
-    infoRow: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: "10px",
+        margin: '5px 0',
     },
     divider: {
-        height: "1px",
-        backgroundColor: "#444",
-        marginVertical: "10px",
+        margin: '10px 0',
+        border: '1px solid #444',
     },
-    sectionTitle: {
-        fontSize: "26px",
-        fontWeight: "bold",
-        color: "#f5c469",
-        marginBottom: "12px",
-        textAlign: "center",
-    },
-    clientAmountText: {
-        fontSize: "20px",
-        fontWeight: "bold",
-        color: "#ff6347",
-        textAlign: "center",
-        textShadow: "1px 1px 5px rgba(0, 0, 0, 0.7)",
-    },
-    noAbonosText: {
-        fontSize: "16px",
-        color: "#888",
-        textAlign: "center",
+    button: {
+        padding: '10px',
+        backgroundColor: '#f5c469',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
     },
     toggleButton: {
-        marginVertical: "15px",
-        paddingVertical: "10px",
-        borderRadius: "10px",
-        backgroundColor: "#2a2a2a",
-        alignItems: "center",
-        color: "#fff",
+        marginTop: '10px',
+        padding: '10px',
+        backgroundColor: '#444',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
     },
-    abonoItem: {
-        padding: "15px",
-        borderRadius: "12px",
-        marginBottom: "12px",
+    modal: {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        padding: '20px',
+        backgroundColor: '#1a1a1a',
+        borderRadius: '10px',
     },
-    abonoText: {
-        fontSize: "16px",
-        color: "#f9f9f9",
+    productItem: {
+        marginBottom: '10px',
     },
-    check: {
-        fontSize: "16px",
-        color: "#888",
-        textAlign: "center",
-        marginBottom: "12px",
-    },
-    noAbonoButton: {
-        backgroundColor: "#ff6347",
-        paddingVertical: "10px",
-        borderRadius: "10px",
-        justifyContent: "center",
-        alignItems: "center",
-        marginVertical: "15px",
-        boxShadow: "0px 5px 10px rgba(255, 99, 71, 0.5)",
-    },
-    noAbonoButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
-    toggleButtonText: {
-        color: "#b1b1b1",
+    closeButton: {
+        marginTop: '10px',
+        padding: '10px',
+        backgroundColor: '#f5c469',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
     },
 };
 
