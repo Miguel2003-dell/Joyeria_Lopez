@@ -98,7 +98,7 @@ const NuevoCliente = () => {
             if (!token) throw new Error('No se encontró un token de autenticación');
 
             await axios.post(
-                'http://localhost:3000/api/clientes',
+                'http://:3000/api/clientes',
                 {
                     nombre,
                     direccion,
