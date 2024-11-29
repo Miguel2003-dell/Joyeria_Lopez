@@ -8,7 +8,6 @@ import EstadisticasScreen from "../screens/Estadisticas";
 import AdminDashboard from "../screens/AdminDashboard";
 import TrabajadoresDetails from '../screens/TrabajadorClientes';
 import NuevoTrabajador from '../screens/NuevoTrabajador';
-import EliminarTrabajador from '../components/EliminarTrabajador';
 import EditarTrabajador from '../components/EditarTrabajador';
 import EditarClientes from '../components/EditarClientes';
 import AgregarProducto from '../screens/AgregarProducto';
@@ -32,7 +31,7 @@ export const MyRoutes = () => {
             <Route path="/editar-clientes" element={<EditarClientes />} /> 
             <Route path="/agregar-producto" element={<AgregarProducto />} /> 
             <Route path="/ver-joyeria" element={<VerJoyeria />} /> 
-            <Route path="/producto" element={<ListaProductos />} /> 
+            <Route path="/productos/:id_categoria/:nombre" element={<ListaProductos />} />
         </Routes>
     );
 };

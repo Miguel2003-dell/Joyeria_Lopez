@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useHistory para navegación
 import axios from 'axios';
 
 const VerJoyeria = () => {
@@ -6,6 +7,7 @@ const VerJoyeria = () => {
     const [filteredCategorias, setFilteredCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState('');
+    const navigate = useNavigate(); // Use useNavigate
 
     useEffect(() => {
         const fetchCategorias = async () => {
@@ -35,35 +37,44 @@ const VerJoyeria = () => {
         }
     };
 
-    const renderCategoria = (categoria) => (
-        <div className="category-button" key={categoria.id_categoria}>
-            <button className="category-button-text" onClick={() => window.location.href = `/productos/${categoria.id_categoria}`}>
-                {categoria.nombre}
-            </button>
-        </div>
+    const renderCategoria = (item) => (
+        <button
+            style={styles.categoryButton}
+            onClick={() =>
+                navigate(`/productos/${item.id_categoria}/${item.nombre}`, {
+                    state: {
+                        id_categoria: item.id_categoria,
+                        nombre: item.nombre,
+                    },
+                })
+            }
+            aria-label={`Ver productos de la categoría ${item.nombre}`}
+        >
+            <span style={styles.categoryButtonText}>{item.nombre}</span>
+        </button>
     );
 
     if (loading) {
         return (
-            <div className="loader">
-                <div className="spinner"></div>
+            <div style={styles.loader}>
+                <span>Loading...</span>
             </div>
         );
     }
 
     return (
-        <div className="container">
-            <h1 className="title">Categorías de Joyería</h1>
-            <div className="search-container">
+        <div style={styles.container}>
+            <h1 style={styles.title}>Categorías de Joyería</h1>
+            <div style={styles.searchContainer}>
+                <span style={styles.searchIcon}>🔍</span>
                 <input
-                    type="text"
+                    style={styles.searchInput}
                     placeholder="Buscar categoría..."
-                    className="search-input"
                     value={searchText}
                     onChange={(e) => handleSearch(e.target.value)}
                 />
             </div>
-            <div className="list-container">
+            <div style={styles.listContainer}>
                 {filteredCategorias.map(renderCategoria)}
             </div>
         </div>
@@ -72,12 +83,11 @@ const VerJoyeria = () => {
 
 const styles = {
     container: {
-        backgroundColor: '#1e1e1e',
-        padding: '16px',
-        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        backgroundColor: '#1e1e1e',
+        padding: '16px',
     },
     title: {
         fontSize: '26px',
@@ -89,25 +99,31 @@ const styles = {
     },
     searchContainer: {
         display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
-        border: '1px solid #707070',
+        borderColor: '#707070',
+        borderWidth: '1px',
         borderRadius: '10px',
         marginBottom: '20px',
         backgroundColor: '#1e1e1e',
-        padding: '10px',
+        padding: '5px',
+    },
+    searchIcon: {
+        marginRight: '10px',
     },
     searchInput: {
         flex: 1,
         color: '#d1a980',
         fontSize: '16px',
         padding: '10px',
-        background: 'none',
         border: 'none',
+        background: 'transparent',
         outline: 'none',
     },
     listContainer: {
+        display: 'flex',
+        flexDirection: 'column',
         width: '100%',
-        maxWidth: '1200px',
         paddingBottom: '16px',
     },
     categoryButton: {
@@ -115,31 +131,23 @@ const styles = {
         borderRadius: '6px',
         padding: '15px',
         marginBottom: '12px',
-        boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+        cursor: 'pointer',
+        textAlign: 'center',
+        width: '100%',
     },
     categoryButtonText: {
         color: '#1e1e1e',
         fontSize: '16px',
         fontWeight: 'bold',
-        textAlign: 'center',
         textTransform: 'uppercase',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
     },
     loader: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-    },
-    spinner: {
-        width: '50px',
-        height: '50px',
-        border: '5px solid #f3f3f3',
-        borderTop: '5px solid #ffd700',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
+        fontSize: '24px',
     },
 };
 
