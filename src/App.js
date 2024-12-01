@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
@@ -10,10 +10,15 @@ export const ThemeContext = React.createContext(null);
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Controla el estado de autenticación
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light"); // Obtener el tema inicial desde localStorage
   const themeStyle = theme === "light" ? Light : Dark;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+    // Efecto para actualizar el tema en localStorage cuando cambie
+    useEffect(() => {
+      localStorage.setItem("theme", theme); // Guardar el tema en localStorage
+    }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ setTheme, theme }}>
@@ -29,10 +34,17 @@ function App() {
   );
 }
 
-const AppContent = ({ sidebarOpen, setSidebarOpen }) => {
+const AppContent = ({ sidebarOpen, setSidebarOpen, setTheme }) => {
   const location = useLocation(); // Obtiene la ruta actual
 
   const isLoginRoute = location.pathname === "/login"; // Verifica si estás en la ruta de login
+
+    // Eliminar el tema de localStorage al cerrar sesión
+    const handleLogout = () => {
+      localStorage.removeItem("token"); // Eliminar token
+      localStorage.removeItem("theme"); // Eliminar tema guardado
+      setTheme("light"); // Restablecer el tema al predeterminado
+    };
 
   return (
     <>
@@ -46,6 +58,7 @@ const AppContent = ({ sidebarOpen, setSidebarOpen }) => {
           <Sidebar
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onLogout={handleLogout} // Pasar la función para cerrar sesión
           />
           <Content>
             <MyRoutes /> {/* Aquí se renderizan todas las rutas */}
