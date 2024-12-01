@@ -82,7 +82,7 @@ const styles = {
     },
     input: {
         height: '45px',
-        width: '100%',
+        width: '96.3%',
         border: '1px solid #d1a980',
         borderRadius: '10px',
         backgroundColor: '#1a1a1a',

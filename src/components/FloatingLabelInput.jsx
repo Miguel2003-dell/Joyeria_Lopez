@@ -32,7 +32,7 @@ const FloatingLabelInput = ({ label, value, onChangeText, type = 'text', ...prop
                     paddingTop: '20px',
                     color: '#fff',
                     fontSize: '16px',
-                    width: '100%',
+                    width: '97%',
                 }}
                 {...props}
             />

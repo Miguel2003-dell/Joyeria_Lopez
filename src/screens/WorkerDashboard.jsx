@@ -60,7 +60,7 @@ const WorkerDashboard = () => {
     });
 
     const renderClienteList = (clientes) => (
-        <div className="client-list">
+        <div style={styles.clientList}>
             {clientes.length > 0 ? (
                 clientes.map(cliente => (
                     <ClienteCard
@@ -70,7 +70,7 @@ const WorkerDashboard = () => {
                     />
                 ))
             ) : (
-                <p className="empty-message">No hay clientes disponibles.</p>
+                <p style={styles.emptyMessage}>No hay clientes disponibles.</p>
             )}
         </div>
     );
@@ -89,28 +89,94 @@ const WorkerDashboard = () => {
     };
 
     return (
-        <div className="dashboard-container">
-            <header className="header">
-                <h1 className="title">Clientes</h1>
+        <div style={styles.dashboardContainer}>
+            <header style={styles.header}>
+                <h1 style={styles.title}>Clientes</h1>
             </header>
-            <div className="search-container">
+            <div style={styles.searchContainer}>
                 <input
                     type="text"
-                    className="search-input"
+                    style={styles.searchInput}
                     placeholder="Buscar clientes"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                 />
             </div>
-            <div className="tab-view">
-                <button onClick={() => setActiveTab('conPagoHoy')}>Con pago hoy</button>
-                <button onClick={() => setActiveTab('atrasados')}>Atrasados</button>
-                <button onClick={() => setActiveTab('sinPagoHoy')}>Sin pago hoy</button>
-                <button onClick={() => setActiveTab('filtered')}>Todos</button>
+            <div style={styles.tabView}>
+                <button onClick={() => setActiveTab('conPagoHoy')} style={styles.tabButton}>Con pago hoy</button>
+                <button onClick={() => setActiveTab('atrasados')} style={styles.tabButton}>Atrasados</button>
+                <button onClick={() => setActiveTab('sinPagoHoy')} style={styles.tabButton}>Sin pago hoy</button>
+                <button onClick={() => setActiveTab('filtered')} style={styles.tabButton}>Todos</button>
             </div>
             <div>{renderClienteList(getActiveClientes())}</div>
         </div>
     );
+};
+
+const styles = {
+    dashboardContainer: {
+        backgroundColor: '#121212',
+        color: '#f5c469',
+        padding: '20px',
+        minHeight: '100vh',
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+    },
+    title: {
+        fontSize: '28px',
+        fontWeight: 'bold',
+        letterSpacing: '0.8px',
+    },
+    logoutButton: {
+        backgroundColor: '#ff6347',
+        color: '#fff',
+        border: 'none',
+        padding: '10px 15px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontSize: '16px',
+    },
+    searchContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '20px',
+    },
+    searchInput: {
+        width: '100%',
+        maxWidth: '500px',
+        padding: '10px',
+        border: '1px solid #707070',
+        borderRadius: '8px',
+        backgroundColor: '#1e1e1e',
+        color: '#d1a980',
+    },
+    tabView: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '20px',
+    },
+    tabButton: {
+        margin: '5px',
+        padding: '10px 20px',
+        border: 'none',
+        backgroundColor: '#1c1c1e',
+        color: '#fff',
+        borderRadius: '5px',
+        cursor: 'pointer',
+    },
+    clientList: {
+        marginTop: '20px',
+    },
+    emptyMessage: {
+        textAlign: 'center',
+        marginTop: '20px',
+        color: '#fff',
+        fontSize: '16px',
+    },
 };
 
 export default WorkerDashboard;

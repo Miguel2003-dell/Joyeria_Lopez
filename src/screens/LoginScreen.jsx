@@ -252,7 +252,8 @@ const styles = {
         marginTop: 10,
         marginBottom: 15, // Aumenta separación entre campos
         padding: 5,
-        backgroundColor: "#1a1a1a",
+        backgroundColor: "#ffffff",
+        boxShadow: "0px 5px 15px rgba(255, 99, 71, 0.3)",
     },
     input: {
         flex: 1,
@@ -263,8 +264,10 @@ const styles = {
     },
     icon: {
         padding: 10,
-        color: "#f5c469",
+        color: "#1a1a1a",
+        backgroundColor: "#f5c469",
         maxWidth: "12%",
+        height: 40,
     },
     buttonContainer: {
         width: "100%",

@@ -127,7 +127,9 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
                         }
                         onClick={() => {
                             if (to === "/login") {
-                                localStorage.removeItem("token"); // Eliminar token al cerrar sesión
+                                localStorage.removeItem("token"); // Eliminar token
+                                localStorage.removeItem("theme"); // Eliminar tema guardado
+                                setTheme("light"); // Restablecer el tema al predeterminado
                             }
                         }}
                     >
