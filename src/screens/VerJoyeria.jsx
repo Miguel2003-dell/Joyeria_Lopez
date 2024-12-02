@@ -88,6 +88,7 @@ const styles = {
         alignItems: 'center',
         backgroundColor: '#1e1e1e',
         padding: '16px',
+        minHeight: '100vh',
     },
     title: {
         fontSize: '26px',

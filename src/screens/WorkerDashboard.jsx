@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ClienteCard from '../components/ClienteCard';
 import { useNavigate } from 'react-router-dom'; // Importamos useNavigate
-import '../styles/WorkerDashboard.css';
 
 const WorkerDashboard = () => {
     const [clientes, setClientes] = useState([]);
@@ -121,10 +120,12 @@ const styles = {
         minHeight: '100vh',
     },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
+        fontSize: '26px',
+        fontWeight: 'bold',
+        color: '#FFD700',
+        marginBottom: '16px',
+        textAlign: 'center',
+        textTransform: 'uppercase',
     },
     title: {
         fontSize: '28px',

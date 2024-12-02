@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import FloatingLabelInput from '../components/FloatingLabelInput';
 
 const NuevoTrabajador = () => {
     const [nombre, setNombre] = useState('');
@@ -76,40 +77,27 @@ const NuevoTrabajador = () => {
                 <h2 style={styles.header}>Agregar Nuevo Trabajador</h2>
 
                 <div style={styles.inputContainer}>
-                    <label style={styles.label}>Nombre</label>
-                    <input
-                        type="text"
-                        value={nombre}
-                        onChange={(e) => setNombre(e.target.value)}
-                        style={styles.input}
-                    />
-                </div>
-                <div style={styles.inputContainer}>
-                    <label style={styles.label}>Apellidos</label>
-                    <input
-                        type="text"
-                        value={apellidos}
-                        onChange={(e) => setApellidos(e.target.value)}
-                        style={styles.input}
-                    />
-                </div>
-                <div style={styles.inputContainer}>
-                    <label style={styles.label}>Correo Electrónico</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={styles.input}
-                    />
-                </div>
-                <div style={styles.inputContainer}>
-                    <label style={styles.label}>Contraseña</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={styles.input}
-                    />
+                <FloatingLabelInput
+                    label="Nombre"
+                    value={nombre}
+                    onChangeText={setNombre}
+                />
+                <FloatingLabelInput
+                    label="Apellidos"
+                    value={apellidos}
+                    onChangeText={setApellidos}
+                />
+                <FloatingLabelInput
+                    label="Correo Electrónico"
+                    value={email}
+                    onChangeText={setEmail}
+                />
+                <FloatingLabelInput
+                    label="Contraseña"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
                 </div>
 
                 <div style={styles.inputContainer}>
@@ -146,21 +134,29 @@ const NuevoTrabajador = () => {
 
 const styles = {
     container: {
+        backgroundColor: '#121212',
+        color: '#f5c469',
         padding: '20px',
-        backgroundColor: '#101010',
+        minHeight: '100vh',
     },
     header: {
-        fontSize: '28px',
+        fontSize: '26px',
         fontWeight: 'bold',
-        color: '#f5c469',
+        color: '#FFD700',
+        marginBottom: '16px',
         textAlign: 'center',
-        marginBottom: '20px',
+        textTransform: 'uppercase',
     },
     inputContainer: {
-        marginBottom: '15px',
+        marginBottom: 15,
+        backgroundColor: '#1a1a1a',
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
     },
     label: {
         color: '#fff',
+        marginLeft: '5px',
         marginBottom: '5px',
         display: 'block',
     },
@@ -174,12 +170,12 @@ const styles = {
         marginBottom: '10px',
     },
     select: {
-        width: '100%',
-        padding: '10px',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#1c1c1e',
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 15,
         color: '#fff',
-        borderRadius: '5px',
-        border: 'none',
+        width: '100%',
     },
     buttonContainer: {
         marginTop: '20px',

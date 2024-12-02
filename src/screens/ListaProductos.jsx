@@ -1,23 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom'; // Asegúrate de importar useParams aquí
+import { useParams, useNavigate } from 'react-router-dom'; 
 
 const ListaProductos = () => {
-    const { id_categoria, nombre } = useParams(); // Captura el parámetro id_categoria de la URL
+    const { id_categoria, nombre } = useParams(); 
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
-    // Función para obtener productos
     const fetchProductos = useCallback(async () => {
-        console.log('Buscando productos para la categoría:', id_categoria); // Imprimir id_categoria
         setLoading(true);
         try {
             const response = await axios.get(
                 `http://localhost:3000/api/productos/productoCategoria?id_categoria=${id_categoria}`
             );
-            console.log('Respuesta de la API:', response.data); // Verifica la respuesta de la API
             setProductos(response.data);
         } catch (error) {
             console.error('Error al obtener productos:', error.response?.data || error.message);
@@ -27,16 +24,10 @@ const ListaProductos = () => {
     }, [id_categoria]);
 
     useEffect(() => {
-        console.log('id_categoria en useEffect:', id_categoria); // Verificar id_categoria cuando cambia
         if (id_categoria) {
-            console.log('Buscando productos para la categoría:', id_categoria); // Solo realiza la búsqueda si id_categoria es válido
             fetchProductos();
-        } else {
-            console.log('id_categoria no está definido');
         }
     }, [fetchProductos, id_categoria]);
-
-    console.log('Productos:', productos);  // Asegúrate de que `productos` contiene datos
 
     const handleSearch = (query) => {
         setSearchQuery(query);
@@ -47,8 +38,11 @@ const ListaProductos = () => {
     );
 
     const handleEdit = (productoId) => {
-        navigate(`/editarProducto/${productoId}`);
+    // Verifica si el id_producto está presente
+    console.log('ID del producto a editar:', productoId);
+    navigate(`/editarProducto/${productoId}`);
     };
+
 
     const handleDelete = async (productoId) => {
         try {
@@ -160,7 +154,7 @@ const styles = {
         fontSize: '20px',
         fontWeight: 'bold',
         color: '#f5c469',
-        marginBottom: '10px',
+        marginBottom: '2px',
     },
     detailsContainer: {
         marginTop: '8px',
@@ -171,24 +165,23 @@ const styles = {
     },
     iconContainer: {
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         marginTop: '12px',
     },
     iconButton: {
+        marginLeft: '16px',
+        padding: '8px 16px',
         backgroundColor: '#f5c469',
+        color: 'white',
         border: 'none',
-        padding: '8px 12px',
-        fontSize: '16px',
-        color: '#1e1e1e',
-        cursor: 'pointer',
         borderRadius: '4px',
+        cursor: 'pointer',
     },
     loader: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
-        fontSize: '24px',
+        minHeight: '100vh',
     },
 };
 

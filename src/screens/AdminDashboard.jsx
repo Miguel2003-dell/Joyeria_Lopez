@@ -69,9 +69,6 @@ const AdminDashboard = () => {
         <div style={styles.container}>
             <div style={styles.header}>
                 <h1 style={styles.title}>Lista de trabajadores</h1>
-                <button style={styles.logoutButton} onClick={handleLogout}>
-                    <i className="fas fa-sign-out-alt" style={{ fontSize: 24, color: '#ff6347' }} />
-                </button>
             </div>
             <div style={styles.searchContainer}>
                 <i className="fas fa-search" style={styles.searchIcon}></i>
@@ -103,18 +100,23 @@ const styles = {
         flexDirection: 'column',
         padding: '20px',
         backgroundColor: '#121212',
+        minHeight: '100vh',
     },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
+        fontSize: '26px',
+        fontWeight: 'bold',
+        color: '#FFD700',
+        marginBottom: '16px',
+        textAlign: 'center',
+        textTransform: 'uppercase',
     },
     title: {
-        fontSize: '28px',
+        fontSize: '26px',
         fontWeight: 'bold',
-        color: '#f5c469',
-        letterSpacing: '0.8px',
+        color: '#FFD700',
+        marginBottom: '16px',
+        textAlign: 'center',
+        textTransform: 'uppercase',
     },
     searchContainer: {
         display: 'flex',

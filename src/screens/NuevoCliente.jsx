@@ -225,10 +225,8 @@ const NuevoCliente = () => {
     };
 
     return (
-        <div style={{ padding: "20px", backgroundColor: "#101010" }}>
-            <h2 style={{ textAlign: "center", color: "#f5c469" }}>
-                Agregar Cliente
-            </h2>
+        <div style={styles.container}>
+            <h2 style={styles.title}>Agregar Cliente</h2>
 
             <FloatingLabelInput
                 label="Nombre"
@@ -355,15 +353,18 @@ const NuevoCliente = () => {
                 type="number"
             />
 
-            <select
-                onChange={(e) => setFormaPago(e.target.value)}
-                value={formaPago}
-                style={styles.dropdown}
-            >
-                <option value="">Forma de Pago</option>
-                <option value="diario">Diario</option>
-                <option value="semanal">Semanal</option>
-            </select>
+            <div style={styles.inputContainer}>
+                <label style={styles.label}>Forma de pago</label>
+                <select
+                    onChange={(e) => setFormaPago(e.target.value)}
+                    value={formaPago}
+                    style={styles.dropdown}
+                >
+                    <option value="">Selecciona la Forma de pago</option>
+                    <option value="diario">Diario</option>
+                    <option value="semanal">Semanal</option>
+                </select>
+            </div>
 
             {/* Productos seleccionados fuera del TouchableOpacity */}
             <div style={styles.selectedContainer}>
@@ -426,16 +427,31 @@ const NuevoCliente = () => {
 
 const styles = {
     container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#101010',
+        backgroundColor: '#121212',
+        color: '#f5c469',
+        padding: '20px',
+        minHeight: '100vh',
+    },
+    inputContainer: {
+        marginBottom: 15,
+        backgroundColor: '#1a1a1a',
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+    },
+    label: {
+        marginLeft: '5px',
+        color: '#fff',
+        marginBottom: '5px',
+        display: 'block',
     },
     title: {
-        fontSize: 28,
+        fontSize: '26px',
         fontWeight: 'bold',
-        color: '#f5c469',
+        color: '#FFD700',
+        marginBottom: '16px',
         textAlign: 'center',
-        marginBottom: 20,
+        textTransform: 'uppercase',
     },
     input: {
         backgroundColor: '#1c1c1e',
@@ -582,6 +598,7 @@ const styles = {
         padding: 12,
         marginBottom: 15,
         color: '#fff',
+        width: '100%',
     },
     dropdownContainer: {
         borderRadius: 10,

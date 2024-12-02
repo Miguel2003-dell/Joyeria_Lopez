@@ -1,7 +1,7 @@
 import styled from "styled-components";
-import logo from "../Fotos/logo.png";
+import logo from "../Fotos/logolopez.png";
 import { useLocation } from "react-router-dom";
-import { AiOutlineUser, AiOutlineHome, AiOutlineLeft } from "react-icons/ai"; // Importa AiOutlineLeft
+import { AiOutlineUser, AiOutlineHome, AiOutlineLeft, AiFillHome } from "react-icons/ai"; // Importa AiOutlineLeft
 import { MdOutlineAnalytics, MdLogout } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { useContext } from "react";
@@ -9,6 +9,7 @@ import { ThemeContext } from "../App";
 
 // Si 'v' se usa en tu archivo de Variables, asegúrate de importarlo
 import { v } from "../styles/Variables"; // Asegúrate de tener 'v' exportado en ese archivo
+import { FaBoxOpen, FaGem, FaUserPlus } from "react-icons/fa";
 
 export function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const ModSidebaropen = () => {
@@ -37,40 +38,35 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
             ? [
                   {
                       label: "Inicio",
-                      icon: <AiOutlineHome />,
+                      icon: <AiFillHome />,
                       to: "/admin-dashboard",
                   },
                   {
                       label: "Nuevo Trabajador",
-                      icon: <AiOutlineUser />,
+                      icon: <FaUserPlus />,
                       to: "/nuevo-trabajador",
                   },
                   {
                       label: "Agregar Producto",
-                      icon: <AiOutlineUser />,
+                      icon: <FaBoxOpen  />,
                       to: "/agregar-producto",
                   },
                   {
                       label: "Ver Joyería",
-                      icon: <AiOutlineUser />,
+                      icon: <FaGem />,
                       to: "/ver-joyeria",
-                  },
-                  {
-                      label: "Estadísticas",
-                      icon: <MdOutlineAnalytics />,
-                      to: "/estadistica",
                   },
               ]
             : userRole === "Trabajador"
             ? [
                   {
                       label: "Worker Dashboard",
-                      icon: <AiOutlineHome />,
+                      icon: <AiFillHome />,
                       to: "/worker-dashboard",
                   },
                   {
                       label: "Nuevo Cliente",
-                      icon: <AiOutlineUser />,
+                      icon: <FaUserPlus  />,
                       to: "/nuevo-cliente",
                   },
               ]
@@ -90,11 +86,11 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     <img
                         src={logo}
                         alt="Logo"
-                        style={{ width: "45px", height: "auto" }}
+                        className={sidebarOpen ? "logo-large" : "logo-small"}  // Cambiamos el tamaño según el estado
                     />
                 </div>
 
-                <h2>LiquidDev</h2>
+                <h2>Joyería Lopez</h2>
             </div>
 
             {/* Enlaces principales */}
@@ -264,6 +260,20 @@ const Container = styled.div`
             display: ${({ isOpen }) => (isOpen ? `block` : `none`)};
         }
     }
+
+  .imgcontent {
+    margin-right: 10px;
+  }
+
+  .logo-small {
+    width: 60px;  /* Tamaño pequeño del logo */
+    height: auto;
+  }
+      .logo-large {
+    width: 100px;  /* Tamaño grande del logo cuando la sidebar está abierta */
+    height: auto;
+    background: '#fffff';
+  }
     .LinkContainer {
         margin: 8px 0;
 

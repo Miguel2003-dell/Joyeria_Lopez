@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import axios from 'axios';
 
 const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
   const [showClientes, setShowClientes] = useState(false);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const navigate = useNavigate(); // Inicializar navigate
+
 
   const handlePress = () => {
     setShowClientes(!showClientes);
@@ -13,8 +16,10 @@ const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
   };
 
   const handleEdit = () => {
-    if (onEdit) onEdit(trabajador);
+    console.log('ID del trabajador a editar:', trabajador.id_usuario);
+    navigate(`/editar-trabajador/${trabajador.id_usuario}`);
   };
+
 
   const handleDeleteModalOpen = () => {
     setDeleteModalVisible(true);
@@ -57,54 +62,68 @@ const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
   };
 
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
-        <h3 style={styles.cardName}>
-          {trabajador.nombre} {trabajador.apellidos}
-        </h3>
-        <div style={styles.iconContainer}>
-          <button style={styles.iconButton} onClick={handleEdit}>
-            ✏️
-          </button>
-          <button style={styles.iconButton} onClick={handleDeleteModalOpen}>
-            🗑️
-          </button>
-          <button style={styles.iconButton} onClick={handleExport}>
-            📥
-          </button>
-        </div>
-      </div>
-      <div style={styles.row}>
-        <span>👜</span>
-        <p style={styles.cardText}>{trabajador.rol}</p>
-      </div>
-      <div style={styles.row}>
-        <span>👥</span>
-        <p style={styles.cardText}>{trabajador.cliente_count} Clientes</p>
-      </div>
-      <button onClick={handlePress} style={styles.detailsButton}>
-        Ver clientes
-      </button>
+      <div style={styles.card}>
+          <div style={styles.header}>
+              <h3 style={styles.cardName}>
+                  {trabajador.nombre} {trabajador.apellidos}
+              </h3>
+              <div style={styles.iconContainer}>
+                  <button
+                      style={styles.iconButton}
+                      onClick= {handleEdit}
+                  >
+                      ✏️
+                  </button>
 
-      {isDeleteModalVisible && (
-        <div style={styles.modalContainer}>
-          <div style={styles.modalContent}>
-            <h4 style={styles.modalTitle}>Eliminar Trabajador</h4>
-            <p style={styles.modalText}>
-              ¿Estás seguro de que deseas eliminar a este trabajador?
-            </p>
-            <div style={styles.modalButtons}>
-              <button style={styles.modalButtonCancel} onClick={handleDeleteModalClose}>
-                Cancelar
-              </button>
-              <button style={styles.modalButtonDelete} onClick={confirmDelete}>
-                Eliminar
-              </button>
-            </div>
+                  <button
+                      style={styles.iconButton}
+                      onClick={handleDeleteModalOpen}
+                  >
+                      🗑️
+                  </button>
+                  <button style={styles.iconButton} onClick={handleExport}>
+                      📥
+                  </button>
+              </div>
           </div>
-        </div>
-      )}
-    </div>
+          <div style={styles.row}>
+              <span>👜</span>
+              <p style={styles.cardText}>{trabajador.rol}</p>
+          </div>
+          <div style={styles.row}>
+              <span>👥</span>
+              <p style={styles.cardText}>{trabajador.cliente_count} Clientes</p>
+          </div>
+          <button onClick={handlePress} style={styles.detailsButton}>
+              Ver clientes
+          </button>
+
+          {isDeleteModalVisible && (
+              <div style={styles.modalContainer}>
+                  <div style={styles.modalContent}>
+                      <h4 style={styles.modalTitle}>Eliminar Trabajador</h4>
+                      <p style={styles.modalText}>
+                          ¿Estás seguro de que deseas eliminar a este
+                          trabajador?
+                      </p>
+                      <div style={styles.modalButtons}>
+                          <button
+                              style={styles.modalButtonCancel}
+                              onClick={handleDeleteModalClose}
+                          >
+                              Cancelar
+                          </button>
+                          <button
+                              style={styles.modalButtonDelete}
+                              onClick={confirmDelete}
+                          >
+                              Eliminar
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          )}
+      </div>
   );
 };
 
