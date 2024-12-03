@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/Joyeria_Lopez/static/css/main.e6c13ad2.css",
-    "main.js": "/Joyeria_Lopez/static/js/main.7199607e.js",
+    "main.js": "/Joyeria_Lopez/static/js/main.b3928928.js",
     "static/media/logolopez.png": "/Joyeria_Lopez/static/media/logolopez.30fdde75f2b565298c71.png",
     "index.html": "/Joyeria_Lopez/index.html",
     "main.e6c13ad2.css.map": "/Joyeria_Lopez/static/css/main.e6c13ad2.css.map",
-    "main.7199607e.js.map": "/Joyeria_Lopez/static/js/main.7199607e.js.map"
+    "main.b3928928.js.map": "/Joyeria_Lopez/static/js/main.b3928928.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.7199607e.js"
+    "static/js/main.b3928928.js"
   ]
 }
