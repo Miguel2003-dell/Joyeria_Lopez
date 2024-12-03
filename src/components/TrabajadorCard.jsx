@@ -10,10 +10,11 @@ const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
 
   const handlePress = () => {
     setShowClientes(!showClientes);
-    if (!showClientes && onViewClientes) {
-      onViewClientes(trabajador.id_usuario);
+    if (!showClientes) {
+      navigate(`/trabajador/${trabajador.id_usuario}/clientes`);
     }
   };
+  
 
   const handleEdit = () => {
     console.log('ID del trabajador a editar:', trabajador.id_usuario);

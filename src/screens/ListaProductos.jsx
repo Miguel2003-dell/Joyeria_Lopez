@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom'; 
+import { IoCreateOutline, IoTrashOutline } from 'react-icons/io5'; // Iconos de Ionicons
 
 const ListaProductos = () => {
     const { id_categoria, nombre } = useParams(); 
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [productoToDelete, setProductoToDelete] = useState(null); // Producto a eliminar
     const navigate = useNavigate();
 
     const fetchProductos = useCallback(async () => {
@@ -38,16 +41,23 @@ const ListaProductos = () => {
     );
 
     const handleEdit = (productoId) => {
-    // Verifica si el id_producto está presente
-    console.log('ID del producto a editar:', productoId);
-    navigate(`/editarProducto/${productoId}`);
+        navigate(`/editarProducto/${productoId}`);
     };
 
+    // Muestra el modal de confirmación de eliminación
+    const handleDeleteConfirmation = (productoId) => {
+        setProductoToDelete(productoId);
+        setShowDeleteModal(true);
+    };
 
-    const handleDelete = async (productoId) => {
+    // Elimina el producto
+    const handleDelete = async () => {
+        if (!productoToDelete) return;
         try {
-            await axios.delete(`http://localhost:3000/api/productos/${productoId}/eliminarProducto`);
-            fetchProductos();
+            await axios.delete(`http://localhost:3000/api/productos/${productoToDelete}/eliminarProducto`);
+            fetchProductos();  // Actualiza la lista después de eliminar
+            setShowDeleteModal(false); // Cierra el modal
+            setProductoToDelete(null);  // Limpia el producto seleccionado
         } catch (error) {
             console.error('Error al eliminar producto:', error.response?.data || error.message);
         }
@@ -63,10 +73,10 @@ const ListaProductos = () => {
             </div>
             <div style={styles.iconContainer}>
                 <button onClick={() => handleEdit(item.id_producto)} style={styles.iconButton}>
-                    Editar
+                    <IoCreateOutline size={24} color="#f5c469" />
                 </button>
-                <button onClick={() => handleDelete(item.id_producto)} style={styles.iconButton}>
-                    Eliminar
+                <button onClick={() => handleDeleteConfirmation(item.id_producto)} style={styles.iconButton}>
+                    <IoTrashOutline size={24} color="#f54848" />
                 </button>
             </div>
         </div>
@@ -101,6 +111,19 @@ const ListaProductos = () => {
                     <p>No se encontraron productos</p>
                 )}
             </div>
+
+            {/* Modal de confirmación */}
+            {showDeleteModal && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalContent}>
+                        <h3 style={styles.modalTitle}>¿Estás seguro de que deseas eliminar este producto?</h3>
+                        <div style={styles.modalButtons}>
+                            <button onClick={() => setShowDeleteModal(false)} style={styles.modalButtonNo}>Cancelar</button>
+                            <button onClick={handleDelete} style={styles.modalButtonSi}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -111,6 +134,7 @@ const styles = {
         flexDirection: 'column',
         backgroundColor: '#1e1e1e',
         padding: '16px',
+        minHeight: '100vh',
     },
     title: {
         fontSize: '28px',
@@ -119,6 +143,7 @@ const styles = {
         marginBottom: '16px',
         textAlign: 'center',
         textTransform: 'uppercase',
+        letterSpacing: '2px',
     },
     searchContainer: {
         display: 'flex',
@@ -128,6 +153,7 @@ const styles = {
         padding: '8px',
         borderRadius: '8px',
         marginBottom: '20px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
     },
     searchInput: {
         flex: 1,
@@ -170,18 +196,64 @@ const styles = {
     },
     iconButton: {
         marginLeft: '16px',
-        padding: '8px 16px',
-        backgroundColor: '#f5c469',
-        color: 'white',
+        padding: '16px', // Aumenta el padding para mayor espacio alrededor del ícono
+        backgroundColor: 'transparent',
+        color: '#f5c469', // Color del ícono
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
+        fontSize: '32px', // Ajusta el tamaño de la fuente para íconos más grandes
     },
     loader: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
+    },
+
+    // Estilos del modal
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#2a2a2a',
+        padding: '20px',
+        borderRadius: '8px',
+        textAlign: 'center',
+        width: '300px',
+    },
+    modalTitle: {
+        fontSize: '18px',
+        color: '#fff',
+        marginBottom: '16px',
+    },
+    modalButtons: {
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+    modalButtonSi: {
+        padding: '8px 16px',
+        backgroundColor: '#FF0000',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+    },
+    modalButtonNo: {
+        padding: '8px 16px',
+        backgroundColor: '#00FF00',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
     },
 };
 

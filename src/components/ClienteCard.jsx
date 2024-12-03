@@ -4,6 +4,10 @@ import { FaLocationArrow, FaPhone, FaDollarSign, FaEdit, FaTrashAlt, FaDownload 
 const ClienteCard = ({ cliente, onClick, isAdmin, onEdit, onDelete, onExport }) => {
     const [scale, setScale] = useState(1);
 
+    const handleEdit = () => {
+        onEdit(cliente.id_cliente);  // Llamamos a la función onEdit con el clienteId
+      };
+
     const calcularDiasRestantes = (fechaProximoPago) => {
         const hoy = new Date();
         const proximoPago = new Date(fechaProximoPago);
@@ -61,7 +65,7 @@ const ClienteCard = ({ cliente, onClick, isAdmin, onEdit, onDelete, onExport }) 
 
             {isAdmin && (
                 <div style={styles.actionsContainer}>
-                    <button onClick={onEdit} style={styles.actionButton}>
+                    <button onClick={handleEdit} style={styles.actionButton}>
                         <FaEdit size={28} color="#8ecae6" />
                     </button>
                     <button onClick={() => onDelete(cliente)} style={styles.actionButton}>

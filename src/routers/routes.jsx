@@ -13,6 +13,7 @@ import AgregarProducto from '../screens/AgregarProducto';
 import VerJoyeria from '../screens/VerJoyeria';
 import ListaProductos from '../screens/ListaProductos';
 import EditarProducto from '../components/EditarProducto';
+import TrabajadorClientes from "../screens/TrabajadorClientes";
 
 
 export const MyRoutes = () => {
@@ -27,7 +28,9 @@ export const MyRoutes = () => {
             <Route path="/trabajador-clientes/:id" element={<TrabajadoresDetails />} />
             <Route path="/nuevo-trabajador" element={<NuevoTrabajador />} /> 
             <Route path="/editar-trabajador/:id" element={<EditarTrabajador />} /> 
+            <Route path="/trabajador/:id/clientes" element={<TrabajadorClientes />} /> 
             <Route path="/editar-clientes" element={<EditarClientes />} /> 
+            <Route path="/editar-clientes/:id" element={<EditarClientes />} /> 
             <Route path="/agregar-producto" element={<AgregarProducto />} /> 
             <Route path="/ver-joyeria" element={<VerJoyeria />} /> 
             <Route path="/productos/:id_categoria/:nombre" element={<ListaProductos />} />
