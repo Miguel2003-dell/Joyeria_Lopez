@@ -45,7 +45,7 @@ const NuevoTrabajador = () => {
 
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const data = { nombre, apellidos, email, password, role };
+            const data = { nombre, apellidos, email, password, rol: role };
             const response = await axios.post(
                 "https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/trabajadores/agregar",
                 data,
