@@ -32,7 +32,7 @@ const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
 
   const confirmDelete = () => {
     axios
-      .delete(`http://localhost:3000/api/trabajadores/eliminar/${trabajador.id_usuario}`)
+      .delete(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/trabajadores/eliminar?id=${trabajador.id_usuario}`)
       .then(() => {
         handleDeleteModalClose();
         if (onDelete) onDelete(trabajador.id_usuario);
@@ -44,7 +44,7 @@ const TrabajadorCard = ({ trabajador, onDelete, onEdit, onViewClientes }) => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/trabajadores/clientes/${trabajador.id_usuario}`);
+      const response = await axios.get(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/trabajadores/clientes?id=${trabajador.id_usuario}`);
       const clientes = response.data.clientes || [];
       const csvContent = clientes
         .map(

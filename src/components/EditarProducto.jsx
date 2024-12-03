@@ -12,7 +12,7 @@ const EditarProducto = ({ onGoBack }) => {
         const fetchProducto = async () => {
             if (id_producto) {
                 try {
-                    const response = await axios.get(`http://localhost:3000/api/productos/${id_producto}`);
+                    const response = await axios.get(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/id_producto?id=${id_producto}`);
                     setProducto(response.data);
                 } catch (error) {
                     console.error('Error al obtener el producto:', error.response?.data || error.message);
@@ -37,7 +37,7 @@ const EditarProducto = ({ onGoBack }) => {
         try {
             console.log("ID Producto:", id_producto); // Añade esto antes de la solicitud PUT
             await axios.put(
-                `http://localhost:3000/api/productos/${id_producto}`,
+                `tps://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/editar?id_producto=${id_producto}`,
                 producto
             );
             alert("Producto actualizado con éxito");

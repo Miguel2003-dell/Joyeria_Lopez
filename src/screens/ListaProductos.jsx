@@ -16,7 +16,7 @@ const ListaProductos = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://localhost:3000/api/productos/productoCategoria?id_categoria=${id_categoria}`
+                `https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/productoCategoria?id_categoria=${id_categoria}`
             );
             setProductos(response.data);
         } catch (error) {
@@ -51,10 +51,10 @@ const ListaProductos = () => {
     };
 
     // Elimina el producto
-    const handleDelete = async () => {
+    const handleDelete = async (productoId) => {
         if (!productoToDelete) return;
         try {
-            await axios.delete(`http://localhost:3000/api/productos/${productoToDelete}/eliminarProducto`);
+            await axios.delete(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/eliminar?id_producto=${productoId}`);
             fetchProductos();  // Actualiza la lista después de eliminar
             setShowDeleteModal(false); // Cierra el modal
             setProductoToDelete(null);  // Limpia el producto seleccionado

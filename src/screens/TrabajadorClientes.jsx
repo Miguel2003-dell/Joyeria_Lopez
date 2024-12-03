@@ -18,7 +18,7 @@ const TrabajadorClientes = () => {
   useEffect(() => {
     const fetchClientes = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/clientes/clientes/${id}`);
+        const response = await axios.get(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes/clientetrabajador?id_trabajador=${id}`);
         console.log(response.data);
         const clientesPendientes = response.data.sort(
           (a, b) => new Date(a.fecha_proximo_pago) - new Date(b.fecha_proximo_pago)
@@ -54,7 +54,7 @@ const TrabajadorClientes = () => {
 
   const handleDelete = async (clienteId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/clientes/${clienteId}`);
+      const response = await axios.delete(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes/eliminar?id_cliente=${clienteId}`);
       if (response.status === 200) {
         setClientes((prevClientes) =>
           prevClientes.filter((cliente) => cliente.id_cliente !== clienteId)

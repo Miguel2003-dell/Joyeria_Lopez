@@ -13,7 +13,7 @@ const AdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             if (token) {
-                const response = await axios.get('http://localhost:3000/api/trabajadores/conteo', {
+                const response = await axios.get('https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/trabajadores', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

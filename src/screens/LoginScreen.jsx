@@ -42,7 +42,7 @@ const LoginScreen = () => {
     const handleLogin = async () => {
         try {
             const response = await axios.post(
-                "http://localhost:3000/api/auth/login",
+                "https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/login",
                 { email, password }
             );
 

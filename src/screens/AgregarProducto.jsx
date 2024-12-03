@@ -14,7 +14,7 @@ const AgregarProductoScreen = () => {
     const [cantidad, setCantidad] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:3000/api/categorias/")
+        fetch("https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/categorias")
             .then((response) => response.json())
             .then((data) => {
                 setCategorias(data);
@@ -56,7 +56,7 @@ const AgregarProductoScreen = () => {
         }
 
         // Llamada al servidor si todo está validado
-        fetch("http://localhost:3000/api/productos/agregarProducto", {
+        fetch("https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/agregar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -88,7 +88,7 @@ const AgregarProductoScreen = () => {
             return;
         }
 
-        fetch("http://localhost:3000/api/categorias/agregarCategoria", {
+        fetch("https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/categorias/agregar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nombre: nombreCategoria.trim() }),

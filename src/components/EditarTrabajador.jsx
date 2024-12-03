@@ -22,7 +22,7 @@ const EditarTrabajador = () => {
             if (id) {
                 console.log('ID del trabajador:', id); // Verifica el id aquí
                 try {
-                    const response = await axios.get(`http://localhost:3000/api/trabajadores/${id}`);
+                    const response = await axios.get(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/trabajadores/editar?id=${trabajador.id_usuario}`);
                     setTrabajador(response.data);
                     setEditedTrabajador({
                         nombre: response.data.nombre || '',

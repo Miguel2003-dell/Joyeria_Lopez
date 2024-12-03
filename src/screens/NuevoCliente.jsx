@@ -33,7 +33,7 @@ const NuevoCliente = () => {
         const fetchCategorias = async () => {
             try {
                 const response = await axios.get(
-                    "http://localhost:3000/api/categorias"
+                    "https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/categorias"
                 );
                 setCategorias(response.data);
                 setFilteredCategorias(response.data); // Inicializar con todas las categorías
@@ -57,7 +57,7 @@ const NuevoCliente = () => {
     const fetchProductosPorCategoria = async (categoriaId) => {
         try {
             const response = await axios.get(
-                `http://localhost:3000/api/productos?categoria=${categoriaId}`
+                `https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/productos/productoCategoria?id_categoria=${categoriaId}`
             );
             setProductos(response.data);
         } catch {
@@ -180,7 +180,7 @@ const NuevoCliente = () => {
                 throw new Error("No se encontró un token de autenticación");
 
             await axios.post(
-                "http://localhost:3000/api/clientes",
+                "https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes/agregar",
                 {
                     nombre,
                     direccion,

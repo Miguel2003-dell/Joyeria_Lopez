@@ -16,7 +16,7 @@ const WorkerDashboard = () => {
         const fetchClientes = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:3000/api/clientes/', {
+                const response = await axios.get('https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

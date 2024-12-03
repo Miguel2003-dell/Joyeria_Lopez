@@ -25,7 +25,7 @@ const AbonoForm = ({ clienteId, onAddAbono }) => {
             }
 
             const fecha = new Date().toISOString().split('T')[0];
-            const response = await axios.post(`http://localhost:3000/api/clientes/${clienteId}/abonos`, 
+            const response = await axios.post(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes/agregarabonos?id_cliente=${clienteId}`, 
                 { monto: parsedMonto, fecha }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );

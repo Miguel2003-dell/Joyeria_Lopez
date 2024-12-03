@@ -22,7 +22,7 @@ const EditarClientes = ({ cliente, refreshClientes }) => {
                 return;
             }
 
-            const response = await axios.put(`http://192.168.1.18:3000/api/clientes/${cliente.id_cliente}`, {
+            const response = await axios.put(`https://8oj4qmf2y4.execute-api.us-east-1.amazonaws.com/clientes/editar?id_cliente=${cliente.id_cliente}`, {
                 nombre,
                 direccion,
                 telefono,
